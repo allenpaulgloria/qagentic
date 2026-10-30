@@ -1,0 +1,46 @@
+{
+  "name": "qagentic",
+  "version": "1.0.0",
+  "description": "Standalone CLI and library tool that extracts accessibility trees, synthesizes functional test cases, and generates Playwright POM tests.",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "bin": {
+    "qagentic": "./dist/src/cli.js"
+  },
+  "scripts": {
+    "generate": "tsx src/cli.ts",
+    "test": "playwright test",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/allenpaulgloria/qagentic.git"
+  },
+  "keywords": [
+    "playwright",
+    "pom",
+    "gemini",
+    "test-generation",
+    "accessibility"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/allenpaulgloria/qagentic/issues"
+  },
+  "homepage": "https://github.com/allenpaulgloria/qagentic#readme",
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "commander": "^13.1.0",
+    "dotenv": "^18.0.9"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.13.0",
+    "eslint-plugin-playwright": "^2.12.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
