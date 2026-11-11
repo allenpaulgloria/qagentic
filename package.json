@@ -10,6 +10,11 @@
   },
   "scripts": {
     "generate": "tsx src/cli.ts",
+    "draft": "tsx src/cli.ts draft",
+    "scaffold": "tsx src/cli.ts init",
+    "scrape": "tsx src/cli.ts scrape",
+    "dashboard": "tsx src/cli.ts dashboard",
+    "lint": "tsc --noEmit",
     "test": "playwright test",
     "build": "tsc"
   },

@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qagentic — Playwright Test Drafter, Scaffolder & Locator Hub</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --bg-soft: #0f172a;
+      --panel: #1e293b;
+      --panel-alt: #0f172a;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --success: #22c55e;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    /* Top Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(11, 17, 32, 0.92);
+      backdrop-filter: blur(10px);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    .badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge.mode-local {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+    .badge.mode-gh {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.4);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .nav-tab {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .nav-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+
+    /* Hero Banner on Home View */
+    .hero {
+      max-width: 1440px;
+      margin: 24px auto 8px auto;
+      padding: 28px 32px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero h2 {
+      margin: 0 0 8px 0;
+      font-size: 1.65rem;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      font-size: 0.95rem;
+    }
+    .quick-grid {
+      max-width: 1440px;
+      margin: 16px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .quick-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .quick-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+    .quick-card h3 {
+      margin: 0 0 6px 0;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+    .quick-card p {
+      margin: 0;
+      font-size: 0.83rem;
+      color: var(--muted);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 16px 20px 40px 20px;
+    }
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .section-view {
+      display: none;
+    }
+    .section-view.active {
+      display: block;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+      margin-top: 10px;
+    }
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    textarea {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      resize: vertical;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--accent);
+      color: #0f172a;
+      transition: 0.15s;
+    }
+    button:hover {
+      background: var(--accent-hover);
+      color: #fff;
+    }
+    button.secondary {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    button.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    button.success {
+      background: var(--success);
+      color: #052e16;
+    }
+    .alert {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 0.85rem;
+    }
+    .alert.stop {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid var(--danger);
+      color: #fecaca;
+    }
+    .alert.ok {
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid var(--success);
+      color: #bbf7d0;
+    }
+    .element-list {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--panel-alt);
+      padding: 8px;
+      margin-top: 8px;
+    }
+    .element-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 5px 4px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      font-size: 0.78rem;
+    }
+    .element-item code {
+      color: #38bdf8;
+      word-break: break-all;
+    }
+    pre {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      font-size: 0.8rem;
+      margin: 8px 0 0 0;
+      max-height: 380px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background: var(--panel-alt);
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">
+      <h1 style="margin:0;font-size:1.2rem;">qagentic</h1>
+      <span class="badge">Playwright Test Drafter &amp; Scaffolder</span>
+      <span id="runtimeModeBadge" class="badge mode-gh">Standalone Web / GitHub Pages Ready</span>
+    </div>
+    <div class="nav-tabs">
+      <button type="button" class="nav-tab active" onclick="switchTab('workspace')">All-in-One Studio</button>
+      <button type="button" class="nav-tab" onclick="switchTab('scaffolder')">Project Scaffolder Files</button>
+      <button type="button" class="nav-tab" onclick="switchTab('skill')">Agent Skill &amp; Prompt</button>
+      <button type="button" class="nav-tab" onclick="switchTab('docs')">CLI &amp; GitHub Pages Guide</button>
+    </div>
+  </nav>
+
+  <!-- Hero & Quick Access Cards -->
+  <div style="padding: 0 20px;">
+    <div class="hero">
+      <div>
+        <h2>Hit the Ground Running on Playwright Automation</h2>
+        <p>
+          Draft strict ISTQB tests from structured inputs, extract semantic locators from a single URL or DOM subset without slow sessions, and scaffold complete storefront POM repositories. Works both on <strong>GitHub Pages</strong> (100% in-browser) and locally via <code>npm run dashboard</code>.
+        </p>
+      </div>
+      <div class="btn-row" style="margin:0;">
+        <button type="button" onclick="switchTab('workspace'); loadSamplePdpBrief(); runDraft(false, false);">Try Sample QAX-1155 Flow</button>
+        <button type="button" class="secondary" onclick="switchTab('scaffolder')">Browse Scaffold Templates</button>
+        <button type="button" class="secondary" onclick="switchTab('skill')">Copy Drafter Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="quick-card" onclick="switchTab('workspace')">
+      <h3>1. ISTQB Test Drafter</h3>
+      <p>Turn your numbered Expected Results into web-first Playwright specs, Page Objects, Candidate Assertions, and Git/MR summaries with Stop-and-Ask safety gates.</p>
+    </div>
+    <div class="quick-card" onclick="switchTab('workspace'); document.getElementById('urlInput').focus();">
+      <h3>2. Fast URL &amp; Subset Scraper</h3>
+      <p>Scrape a single URL or targeted DOM subset (<code>&lt;main&gt;</code>, forms, dialogs, or pasted HTML snippets) in seconds and pick only the elements you need.</p>
+    </div>
+    <div class="quick-card" onclick="switchTab('scaffolder')">
+      <h3>3. Storefront Project Scaffolder</h3>
+      <p>Generate <code>utils/fixtures.ts</code>, <code>utils/test-data.ts</code>, <code>utils/sku.ts</code>, <code>page-objects/storefront/</code>, and <code>.cursor/rules/</code> in one click.</p>
+    </div>
+    <div class="quick-card" onclick="switchTab('skill')">
+      <h3>4. Agent Skill &amp; Inputs Template</h3>
+      <p>Grab the ready-to-paste <code>## Inputs</code> Markdown brief and <code>SKILL.md</code> for Cursor or Antigravity agents.</p>
+    </div>
+  </div>
+
+  <!-- TAB 1: All-in-One Studio (Workspace) -->
+  <div id="tab-workspace" class="container section-view active">
+    <div class="workspace-grid">
+      <!-- Left Column: Repo Scaffolder, Fast Subset Scraper, and Drafter Inputs -->
+      <div>
+        <div class="card">
+          <h2>1. Target Project &amp; Scaffolder</h2>
+          <label for="repoPath">Target Playwright Repository Path (Local Server Mode)</label>
+          <input type="text" id="repoPath" value="__DEFAULT_REPO_PATH__" />
+          <div class="btn-row">
+            <button type="button" class="secondary" onclick="inspectRepo()">Inspect Repo</button>
+            <button type="button" onclick="scaffoldRepo()">Scaffold Project Structure</button>
+            <button type="button" class="secondary" onclick="switchTab('scaffolder')">View / Download Templates</button>
+          </div>
+          <div id="repoStatus" style="margin-top: 10px; font-size: 0.8rem; color: var(--muted);"></div>
+        </div>
+
+        <div class="card">
+          <h2>2. Fast URL / DOM-Subset Scraper</h2>
+          <label for="urlInput">Target URL (Single URL — No Slow Crawling)</label>
+          <input type="text" id="urlInput" placeholder="https://example.com/products/shirt" value="https://the-internet.herokuapp.com/login" />
+
+          <div class="row">
+            <div>
+              <label for="scopePreset">Scrape Scope Subset</label>
+              <select id="scopePreset" onchange="onScopePresetChange()">
+                <option value="">Full Page (body)</option>
+                <option value="main, [role='main']" selected>Main Content Only (&lt;main&gt;)</option>
+                <option value="form, [role='form'], [role='dialog']">Forms &amp; Dialogs Only</option>
+                <option value="custom">Custom CSS / ARIA Container...</option>
+              </select>
+            </div>
+            <div>
+              <label for="customScope">Scope Selector</label>
+              <input type="text" id="customScope" value="main, [role='main'], #content" placeholder="e.g. #pdp-main" />
+            </div>
+          </div>
+
+          <label for="htmlSnippetInput">Optional (GitHub Pages / Offline Mode): Paste HTML Snippet to Extract Subset Locators Instantly</label>
+          <textarea id="htmlSnippetInput" rows="3" placeholder="<main><H1>Classic Tee</H1><label for='qty'>Quantity</label><input id='qty' type='number' /><button type='button'>Add to Cart</button><a href='/size-guide'>Size Guide</a></main>"></textarea>
+
+          <div class="btn-row">
+            <button type="button" onclick="runFastScrape()">Quick Scrape URL / Subset</button>
+            <button type="button" class="secondary" onclick="extractFromHtmlSnippet()">Extract from HTML Snippet</button>
+            <button type="button" class="secondary" onclick="toggleAllElements(true)">Select All</button>
+            <button type="button" class="secondary" onclick="toggleAllElements(false)">Clear</button>
+          </div>
+          <div id="scrapeMeta" style="margin-top: 8px; font-size: 0.78rem; color: var(--muted);"></div>
+          <div id="elementsContainer" class="element-list" style="display:none;"></div>
+        </div>
+
+        <div class="card">
+          <h2>3. Drafter Inputs (ISTQB &amp; Guardrails)</h2>
+          <label for="briefPaste">Optional: Paste Markdown "## Inputs" Block</label>
+          <textarea id="briefPaste" rows="4" placeholder="- URL: https://...\n- Flow (one flow only): Add a 2-option product to cart from PDP\n- Platform: both\n- ENV: staging\n- Expected results: 1. Mini-cart opens 2. Badge count updates\n- Account needed: none\n- Tag: @smoke\n- Ticket ID and title: QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)"></textarea>
+          <div class="btn-row">
+            <button type="button" class="secondary" onclick="parsePastedBrief()">Parse Markdown Brief</button>
+            <button type="button" class="secondary" onclick="loadSamplePdpBrief()">Load Sample QAX-1155 Brief</button>
+          </div>
+
+          <label for="flowInput">Flow (one flow only)</label>
+          <input type="text" id="flowInput" value="Add a 2-option product to cart from PDP" />
+
+          <div class="row">
+            <div>
+              <label for="platformInput">Platform</label>
+              <select id="platformInput">
+                <option value="both" selected>both (web-local &amp; mobile-local)</option>
+                <option value="web-local">web-local</option>
+                <option value="mobile-local">mobile-local</option>
+              </select>
+            </div>
+            <div>
+              <label for="envInput">ENV (Required — No Prod Default)</label>
+              <select id="envInput">
+                <option value="">-- Select ENV (Stop &amp; Ask if blank) --</option>
+                <option value="dev">dev</option>
+                <option value="staging" selected>staging</option>
+                <option value="prod">prod</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="accountInput">Account Needed</label>
+              <input type="text" id="accountInput" value="none" placeholder="none or SMOKE_WEB_USER" />
+            </div>
+            <div>
+              <label for="tagInput">Tag</label>
+              <input type="text" id="tagInput" value="@smoke" placeholder="@smoke | @regression" />
+            </div>
+          </div>
+
+          <label for="ticketInput">Ticket ID and Title</label>
+          <input type="text" id="ticketInput" value="QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)" />
+
+          <label for="expectedInput">Expected Results (One per line, numbered)</label>
+          <textarea id="expectedInput" rows="3">1. Confirmation dialog or status banner is visible after clicking Add to Cart
+2. Cart badge count updates to match minimum quantity</textarea>
+
+          <div class="btn-row">
+            <button type="button" onclick="runDraft(false, false)">Preview Draft</button>
+            <button type="button" class="success" onclick="runDraft(true, false)">Write Draft to Repo</button>
+            <button type="button" class="secondary" onclick="downloadDraftFiles()">Download Spec &amp; POM</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Guardrails, ISTQB Table, Candidate Assertions, Code & MR Summary -->
+      <div>
+        <div id="alertBox"></div>
+
+        <div class="card">
+          <h2>
+            <span>ISTQB Test Table &amp; Git Branch</span>
+            <span id="branchBadge" class="badge"></span>
+          </h2>
+          <div id="testTableContainer" style="color: var(--muted); font-size: 0.84rem;">
+            Click <strong>Preview Draft</strong> to generate the ISTQB test design table, Page Object diff, Spec file, and Candidate Assertions.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Candidate Assertions (Confirm to Promote into Spec)</h2>
+          <div style="font-size: 0.8rem; color: var(--muted);">
+            Observations from the scraped page that were <em>not</em> in your numbered expected results are held here as candidates. Check any candidate below and re-draft to promote it into the spec.
+          </div>
+          <div id="candidatesContainer" class="element-list" style="margin-top: 8px;">
+            <div style="color: var(--muted); font-size: 0.8rem;">No candidates yet.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>
+            <span>Drafted Spec (<code id="specPathLabel">tests/...</code>)</span>
+            <button type="button" class="secondary" onclick="copyText('specCodeBox')">Copy Spec</button>
+          </h2>
+          <pre id="specCodeBox">// Drafted Playwright spec will appear here...</pre>
+        </div>
+
+        <div class="card">
+          <h2>
+            <span>Page Object (<code id="poPathLabel">page-objects/storefront/...</code>)</span>
+            <button type="button" class="secondary" onclick="copyText('poCodeBox')">Copy Page Object</button>
+          </h2>
+          <pre id="poCodeBox">// Drafted Page Object Model will appear here...</pre>
+        </div>
+
+        <div class="card">
+          <h2>
+            <span>Output Summary &amp; MR Description</span>
+            <button type="button" class="secondary" onclick="copyText('summaryBox')">Copy Summary</button>
+          </h2>
+          <pre id="summaryBox">// Output summary and MR description will appear here...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Project Scaffolder Templates -->
+  <div id="tab-scaffolder" class="container section-view">
+    <div class="card">
+      <h2>
+        <span>Playwright Storefront Scaffolding Templates</span>
+        <button type="button" onclick="switchTab('workspace'); scaffoldRepo();">Scaffold to Local Repo</button>
+      </h2>
+      <p style="color: var(--muted); font-size: 0.86rem; margin-top: 0;">
+        Copy or download any of the core starter files below to bootstrap a new Playwright automation repository with <code>web-local</code> / <code>mobile-local</code> projects, semantic Page Object fixtures, and test-data loaders.
+      </p>
+      <div id="scaffoldTemplatesContainer"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Agent Skill & Prompt Library -->
+  <div id="tab-skill" class="container section-view">
+    <div class="card">
+      <h2>
+        <span>Blank "## Inputs" Brief Template (Fill &amp; Paste)</span>
+        <button type="button" class="secondary" onclick="copyText('blankBriefTemplate')">Copy Inputs Template</button>
+      </h2>
+      <pre id="blankBriefTemplate">## Inputs (I fill these in)
+
+- URL: [url]
+- Flow (one flow only): [e.g. "Add a 2-option product to cart from PDP"]
+- Platform: [web-local | mobile-local | both]
+- ENV: [dev | staging | prod]. If not given, stop and ask. Do not default to prod.
+- Expected results (numbered, from me): [1. ... 2. ... 3. ...]
+- Account needed: [none | name of the existing env var, e.g. SMOKE_WEB_USER]
+- Tag: [@smoke | @regression | other existing tag]
+- Ticket ID and title: [e.g. QAX-1155 [Playwright Migration] PDP - Add To Cart]</pre>
+    </div>
+
+    <div class="card">
+      <h2>
+        <span>Playwright Test Drafter Agent Skill (skills/playwright-test-drafter/SKILL.md)</span>
+        <button type="button" class="secondary" onclick="copyText('fullSkillMarkdown')">Copy Full Skill Prompt</button>
+      </h2>
+      <pre id="fullSkillMarkdown">You are a Playwright test DRAFTER. You draft tests from inputs I give you. You do not decide what the correct behaviour is, and you do not merge anything.
+
+## Before you write anything
+1. Read AGENTS.md, .cursor/rules/playwright-best-practices.mdc, .cursor/rules/katalon-conversion.mdc, and docs/HOW-TO-RUN.md.
+2. Read utils/fixtures.ts, one existing spec under tests/ with a similar flow, and one page object under page-objects/storefront/. Copy their structure. Do not invent a new one.
+3. If the flow needs a page object method that does not exist, add it to the matching page object. Mobile differences (hamburger menu, app banner) go in page objects using the existing platform helpers, not in the spec.
+
+## Drafting rules
+- One spec file for the flow. The same file runs on web-local and mobile-local. Import test and expect from utils/fixtures.ts.
+- Locator order: getByRole with accessible name, then getByLabel, getByPlaceholder, getByText for unique copy, and data-qa only as a fallback. No CSS class selectors where a built-in locator exists. Use filter() and chaining, not long CSS.
+- Web-first assertions only (toBeVisible, toHaveText, toHaveURL, toHaveCount). No waitForTimeout, no networkidle, no page.$ or waitForSelector.
+- Desktop-only cases use skipIfMobile. Do not put platform checks inside the test body.
+- Assertions come from my numbered expected results. Each expected result needs at least one assertion. Do not turn things you merely saw on the page into assertions. List them in the summary as candidates for me to confirm.
+- Test design uses ISTQB techniques, applied only to the inputs I gave (EP/BVA, Decision Table, State Transition, Error Guessing). Write one test per case. Name each test with the technique and the condition, e.g. "BVA: quantity at maximum".
+- Test data: no literal prices, SKUs, promo codes, emails, or passwords in specs. Use the loaders in utils/test-data.ts or utils/sku.ts. If a new value is needed, tell me the variable name and stop. Do not create it yourself.
+- Never create, print, or commit .env.keys, a plaintext .env.creds, DOTENV_PRIVATE_KEY values, or any secret.
+- Do not set SELF_HEAL. Do not run the *-bs or *:bssdk projects.
+- Do not run any action that writes to prod (order placement, sign-up, password reset) unless I explicitly say so.</pre>
+    </div>
+  </div>
+
+  <!-- TAB 4: CLI & GitHub Pages Guide -->
+  <div id="tab-docs" class="container section-view">
+    <div class="card">
+      <h2>Publishing This Home Page via GitHub Pages</h2>
+      <p style="font-size: 0.88rem; color: var(--muted);">
+        This entire Home Page and Test Drafter Studio lives in <code>docs/index.html</code> and includes a built-in browser-side ISTQB &amp; locator engine, so it works immediately on <strong>GitHub Pages</strong> with zero backend required!
+      </p>
+      <pre># Option A: Deploy via GitHub Actions (Included in .github/workflows/deploy-pages.yml)
+1. Push your branch to GitHub.
+2. In your GitHub repository, go to Settings -> Pages.
+3. Under "Build and deployment", set Source to "GitHub Actions".
+4. Every push to main automatically publishes docs/index.html to https://&lt;username&gt;.github.io/qagentic/
+
+# Option B: Deploy from Branch (/docs folder)
+1. In GitHub Settings -> Pages, set Source to "Deploy from a branch".
+2. Select branch "main" and folder "/docs", then click Save.</pre>
+    </div>
+
+    <div class="card">
+      <h2>Local CLI Commands Quick Reference</h2>
+      <pre># 1. Launch this Home Page &amp; Dashboard locally with live Playwright scraping &amp; file writing
+npm run dashboard
+
+# 2. Scaffold a new Playwright storefront project
+npm run scaffold -- --repo ./my-playwright-repo --with-config
+
+# 3. Scrape a single URL or DOM subset fast (1-3s, cached)
+npm run scrape -- --url https://the-internet.herokuapp.com/login --scope "#content" --roles "button,textbox,heading"
+
+# 4. Draft POM &amp; ISTQB spec from a Markdown brief
+npm run draft -- --brief examples/sample-pdp-brief.md --skip-scrape --dry-run</pre>
+    </div>
+  </div>
+
+  <script>
+    let isLocalServerAvailable = false;
+    let scrapedElements = [];
+    let selectedElementIndices = [];
+    let confirmedCandidateCodes = new Set();
+
+    const SCAFFOLD_TEMPLATES = {
+      'utils/fixtures.ts': "import { test as base, expect } from '@playwright/test';\nimport { PdpPage } from '../page-objects/storefront/pdp.page.js';\n\nexport interface StorefrontFixtures {\n  pdpPage: PdpPage;\n}\n\nexport const test = base.extend<StorefrontFixtures>({\n  pdpPage: async ({ page }, use) => {\n    await use(new PdpPage(page));\n  },\n});\n\nexport function skipIfMobile(testInfo: { project: { name: string } }, reason = 'Desktop-only case'): void {\n  test.skip(testInfo.project.name.includes('mobile'), reason);\n}\n\nexport { expect };",
+      'utils/test-data.ts': "export const TEST_DATA = {\n  QUANTITY_MIN: 1,\n  QUANTITY_MAX: 10,\n  VALID_PROMO_CODE: process.env.TEST_PROMO_CODE || 'PROMO_FROM_ENV',\n} as const;\n\nexport function getAccountFromEnv(envVarName: string) {\n  const raw = process.env[envVarName] || '';\n  const [email = '', password = ''] = raw.split(':');\n  return { email, password };\n}",
+      'utils/sku.ts': "export type SkuKey = 'TWO_OPTION_PRODUCT' | 'SINGLE_OPTION_PRODUCT';\n\nexport function getSku(key: SkuKey, env: string = process.env.ENV || 'staging'): string {\n  return process.env[env.toUpperCase() + '_' + key] || 'SKU-' + env.toUpperCase() + '-' + key;\n}",
+      'page-objects/storefront/base.page.ts': "import { Page, Locator } from '@playwright/test';\n\nexport class BaseStorefrontPage {\n  readonly page: Page;\n  readonly mobileMenuButton: Locator;\n  readonly appBannerCloseButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.mobileMenuButton = page.getByRole('button', { name: /menu|navigation/i });\n    this.appBannerCloseButton = page.getByRole('button', { name: /close app banner|dismiss/i });\n  }\n\n  isMobileViewport(): boolean {\n    const size = this.page.viewportSize();\n    return Boolean(size && size.width < 768);\n  }\n\n  async dismissAppBannerIfPresent(): Promise<void> {\n    if (this.isMobileViewport() && (await this.appBannerCloseButton.isVisible())) {\n      await this.appBannerCloseButton.click();\n    }\n  }\n}"
+    };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+      const btns = Array.from(document.querySelectorAll('.nav-tab'));
+      const mapIdx = { workspace: 0, scaffolder: 1, skill: 2, docs: 3 }[tabId];
+      if (btns[mapIdx]) btns[mapIdx].classList.add('active');
+    }
+
+    function renderScaffoldTemplates() {
+      const container = document.getElementById('scaffoldTemplatesContainer');
+      if (!container) return;
+      container.innerHTML = Object.entries(SCAFFOLD_TEMPLATES).map(([filePath, content], idx) => {
+        const preId = 'tpl_' + idx;
+        return '<div style="margin-bottom:14px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          '<strong><code>' + escapeHtml(filePath) + '</code></strong>' +
+          '<button type="button" class="secondary" onclick="copyText(\'' + preId + '\')">Copy File</button>' +
+          '</div>' +
+          '<pre id="' + preId + '">' + escapeHtml(content) + '</pre>' +
+          '</div>';
+      }).join('');
+    }
+
+    function onScopePresetChange() {
+      const preset = document.getElementById('scopePreset').value;
+      const customInput = document.getElementById('customScope');
+      if (preset !== 'custom') {
+        customInput.value = preset;
+      }
+    }
+
+    // Client-side branch name formatter (matches server-side formatBranchName)
+    function formatBranchNameClient(ticketAndTitle) {
+      return String(ticketAndTitle || '')
+        .replace(/[\[\]()]/g, '')
+        .replace(/\s+-\s+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .join('_');
+    }
+
+    // Client-side Markdown brief parser (works on GitHub Pages without a server)
+    function parseMarkdownBriefClient(markdown) {
+      const extractSingleLine = (re) => {
+        const m = markdown.match(re);
+        if (!m || !m[1]) return '';
+        const raw = m[1].trim();
+        if (/^\[.*\]$/.test(raw) && raw.toLowerCase().includes('e.g.')) return '';
+        return raw.replace(/^\[(.*)\]$/, '$1').trim();
+      };
+      const parsed = {
+        url: extractSingleLine(/-\s*URL\s*:\s*(.+)/i),
+        flow: extractSingleLine(/-\s*Flow(?:\s*\([^)]*\))?\s*:\s*(.+)/i),
+        platform: extractSingleLine(/-\s*Platform\s*:\s*(.+)/i).toLowerCase(),
+        env: extractSingleLine(/-\s*ENV\s*:\s*(.+)/i).split('.')[0].trim().toLowerCase(),
+        accountNeeded: extractSingleLine(/-\s*Account needed\s*:\s*(.+)/i),
+        tag: extractSingleLine(/-\s*Tag\s*:\s*(.+)/i),
+        ticket: '',
+        expectedResults: []
+      };
+      const ticketMatch = markdown.match(/-\s*Ticket ID and title\s*:\s*(.+)/i);
+      if (ticketMatch && ticketMatch[1] && !/^\[e\.g\./i.test(ticketMatch[1].trim())) {
+        parsed.ticket = ticketMatch[1].trim();
+      }
+      const expMatch = markdown.match(/-\s*Expected results(?:\s*\([^)]*\))?\s*:\s*([\s\S]*?)(?=\n-\s*(?:Account needed|Tag|Ticket ID)|$)/i);
+      if (expMatch && expMatch[1] && !expMatch[1].includes('1. ...')) {
+        const cleaned = expMatch[1].trim().replace(/^\[|\]$/g, '').trim();
+        parsed.expectedResults = cleaned.split(/(?:^|\s+|\n)\d+\.\s+/).map(s => s.trim()).filter(Boolean);
+      }
+      return parsed;
+    }
+
+    // Client-side HTML snippet extractor (for GitHub Pages / offline instant locator extraction)
+    function extractFromHtmlSnippet() {
+      const rawHtml = document.getElementById('htmlSnippetInput').value.trim() ||
+        '<main><h1>Sample 2-Option Product</h1><label for="opt1">Size</label><select id="opt1"><option>Medium</option></select><label for="qty">Quantity</label><input id="qty" type="number" placeholder="1" /><button type="button">Add to Cart</button><a href="/size-guide">Size Guide</a></main>';
+      const scopeSel = document.getElementById('customScope').value.trim();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHtml, 'text/html');
+      let root = doc.body;
+      if (scopeSel) {
+        try {
+          const found = doc.querySelector(scopeSel);
+          if (found) root = found;
+        } catch {}
+      }
+      const nodes = Array.from(root.querySelectorAll('a[href], button, input, select, textarea, h1, h2, h3, [role], [data-qa]'));
+      scrapedElements = nodes.map((el, index) => {
+        const tag = el.tagName.toLowerCase();
+        let role = el.getAttribute('role') || '';
+        if (!role) {
+          if (tag === 'a') role = 'link';
+          else if (tag === 'button') role = 'button';
+          else if (tag === 'select') role = 'combobox';
+          else if (tag === 'input' || tag === 'textarea') role = 'textbox';
+          else if (/^h[1-6]$/.test(tag)) role = 'heading';
+        }
+        const id = el.getAttribute('id') || '';
+        let labelText = '';
+        if (id) {
+          const lbl = doc.querySelector('label[for="' + id + '"]');
+          if (lbl) labelText = lbl.textContent.trim();
+        }
+        const ariaLabel = el.getAttribute('aria-label') || '';
+        const placeholder = el.getAttribute('placeholder') || '';
+        const text = (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+        const dataQa = el.getAttribute('data-qa') || '';
+        const accessibleName = ariaLabel || labelText || text;
+
+        let strategy = 'getByRole';
+        let rec = "page.getByRole('" + (role || tag) + "')";
+        if (role && accessibleName) {
+          strategy = 'getByRole';
+          rec = 'page.getByRole(' + JSON.stringify(role) + ', { name: ' + JSON.stringify(accessibleName) + ' })';
+        } else if (labelText) {
+          strategy = 'getByLabel';
+          rec = 'page.getByLabel(' + JSON.stringify(labelText) + ')';
+        } else if (placeholder) {
+          strategy = 'getByPlaceholder';
+          rec = 'page.getByPlaceholder(' + JSON.stringify(placeholder) + ')';
+        } else if (text) {
+          strategy = 'getByText';
+          rec = 'page.getByText(' + JSON.stringify(text) + ', { exact: true })';
+        } else if (dataQa) {
+          strategy = 'data-qa';
+          rec = 'page.locator(\'[data-qa="' + dataQa + '"]\')';
+        }
+        return { index, tagName: tag, role, labelText, ariaLabel, placeholder, text, dataQa, locatorStrategy: strategy, recommendedLocator: rec };
+      });
+      selectedElementIndices = scrapedElements.map(e => e.index);
+      document.getElementById('scrapeMeta').innerHTML =
+        'Extracted <strong>' + scrapedElements.length + '</strong> elements in <strong>1ms</strong> (in-browser DOM subset parser)';
+      renderElementsList();
+    }
+
+    async function inspectRepo() {
+      const repo = document.getElementById('repoPath').value;
+      const flow = document.getElementById('flowInput').value;
+      try {
+        const res = await fetch('/api/context?repo=' + encodeURIComponent(repo) + '&flow=' + encodeURIComponent(flow));
+        if (!res.ok) throw new Error('Static mode');
+        const data = await res.json();
+        if (!data.ok) return;
+        isLocalServerAvailable = true;
+        const badge = document.getElementById('runtimeModeBadge');
+        badge.textContent = 'Connected to Local Server';
+        badge.className = 'badge mode-local';
+        const ctx = data.context;
+        document.getElementById('repoStatus').innerHTML =
+          '<div><strong>Storefront Structure:</strong> ' + (ctx.hasTargetStorefrontStructure ? 'Ready' : 'Not initialized yet (click Scaffold Project Structure)') + '</div>' +
+          '<div><strong>Page Objects (' + ctx.allPageObjects.length + '):</strong> ' + (ctx.allPageObjects.join(', ') || 'None') + '</div>' +
+          '<div><strong>Test Data Exports:</strong> ' + (ctx.testDataExports.join(', ') || 'None') + ' | <strong>SKU Exports:</strong> ' + (ctx.skuExports.join(', ') || 'None') + '</div>';
+      } catch {
+        isLocalServerAvailable = false;
+        const badge = document.getElementById('runtimeModeBadge');
+        badge.textContent = 'Standalone Browser Mode (GitHub Pages)';
+        badge.className = 'badge mode-gh';
+        document.getElementById('repoStatus').innerHTML =
+          '<div><strong>Mode:</strong> Running 100% in-browser (GitHub Pages / Static Mode). All ISTQB drafting, Stop-and-Ask checks, HTML subset scraping, and file downloads work directly in your browser! Run <code>npm run dashboard</code> locally for direct filesystem writes.</div>';
+      }
+    }
+
+    async function scaffoldRepo() {
+      if (!isLocalServerAvailable) {
+        switchTab('scaffolder');
+        return;
+      }
+      const repoPath = document.getElementById('repoPath').value;
+      const res = await fetch('/api/scaffold', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoPath, overwrite: false })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const created = data.scaffold.createdFiles.length;
+        const skipped = data.scaffold.skippedFiles.length;
+        document.getElementById('alertBox').innerHTML =
+          '<div class="alert ok">Scaffolded Playwright project in <code>' + data.scaffold.targetDir + '</code> (' + created + ' files created, ' + skipped + ' existing files preserved).</div>';
+        inspectRepo();
+      }
+    }
+
+    async function runFastScrape() {
+      if (!isLocalServerAvailable) {
+        extractFromHtmlSnippet();
+        return;
+      }
+      const url = document.getElementById('urlInput').value;
+      const scopeSelector = document.getElementById('customScope').value;
+      const repoPath = document.getElementById('repoPath').value;
+      document.getElementById('scrapeMeta').textContent = 'Scraping single URL / subset...';
+      const res = await fetch('/api/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url,
+          scopeSelector,
+          repoPath,
+          useCache: true,
+          checkMobileDifferences: document.getElementById('platformInput').value !== 'web-local'
+        })
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        document.getElementById('scrapeMeta').textContent = 'Scrape error: ' + data.error;
+        return;
+      }
+      const pd = data.pageData;
+      scrapedElements = pd.interactiveElements || [];
+      selectedElementIndices = scrapedElements.map(e => e.index);
+      document.getElementById('scrapeMeta').innerHTML =
+        'Extracted <strong>' + scrapedElements.length + '</strong> elements in <strong>' + pd.durationMs + 'ms</strong> ' +
+        (pd.fromCache ? '(from cache)' : '(live)') +
+        (pd.scopeSelector ? ' | Scope: <code>' + pd.scopeSelector + '</code>' : '');
+      renderElementsList();
+    }
+
+    function renderElementsList() {
+      const container = document.getElementById('elementsContainer');
+      if (scrapedElements.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+      container.style.display = 'block';
+      container.innerHTML = scrapedElements.map(el => {
+        const checked = selectedElementIndices.includes(el.index) ? 'checked' : '';
+        return '<label class="element-item">' +
+          '<input type="checkbox" ' + checked + ' onchange="toggleElementIndex(' + el.index + ', this.checked)" />' +
+          '<div><strong>[' + (el.locatorStrategy || el.role) + ']</strong> <code>' + escapeHtml(el.recommendedLocator || '') + '</code></div>' +
+          '</label>';
+      }).join('');
+    }
+
+    function toggleElementIndex(idx, checked) {
+      if (checked && !selectedElementIndices.includes(idx)) {
+        selectedElementIndices.push(idx);
+      } else if (!checked) {
+        selectedElementIndices = selectedElementIndices.filter(i => i !== idx);
+      }
+    }
+
+    function toggleAllElements(selectAll) {
+      selectedElementIndices = selectAll ? scrapedElements.map(e => e.index) : [];
+      renderElementsList();
+    }
+
+    function loadSamplePdpBrief() {
+      const sample = [
+        '- URL: https://the-internet.herokuapp.com/login',
+        '- Flow (one flow only): Add a 2-option product to cart from PDP',
+        '- Platform: both',
+        '- ENV: staging',
+        '- Expected results (numbered, from me):',
+        '  1. Confirmation dialog or status banner is visible after clicking Add to Cart',
+        '  2. Cart badge count updates to match minimum quantity',
+        '- Account needed: none',
+        '- Tag: @smoke',
+        '- Ticket ID and title: QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)'
+      ].join('\n');
+      document.getElementById('briefPaste').value = sample;
+      parsePastedBrief();
+    }
+
+    async function parsePastedBrief() {
+      const markdown = document.getElementById('briefPaste').value;
+      let p;
+      let branchPreview = '';
+      if (isLocalServerAvailable) {
+        try {
+          const res = await fetch('/api/parse-brief', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ markdown })
+          });
+          const data = await res.json();
+          if (data.ok) {
+            p = data.parsed;
+            branchPreview = data.branchPreview;
+          }
+        } catch {}
+      }
+      if (!p) {
+        p = parseMarkdownBriefClient(markdown);
+        branchPreview = p.ticket ? formatBranchNameClient(p.ticket) : '';
+      }
+      if (p.url) document.getElementById('urlInput').value = p.url;
+      if (p.flow) document.getElementById('flowInput').value = p.flow;
+      if (p.platform) document.getElementById('platformInput').value = p.platform;
+      if (p.env !== undefined) document.getElementById('envInput').value = p.env;
+      if (p.accountNeeded) document.getElementById('accountInput').value = p.accountNeeded;
+      if (p.tag) document.getElementById('tagInput').value = p.tag;
+      if (p.ticket) document.getElementById('ticketInput').value = p.ticket;
+      if (p.expectedResults && p.expectedResults.length > 0) {
+        document.getElementById('expectedInput').value = p.expectedResults.map((r, i) => (i + 1) + '. ' + r).join('\n');
+      }
+      if (branchPreview) {
+        document.getElementById('branchBadge').textContent = branchPreview;
+      }
+    }
+
+    // Client-side fallback drafter so GitHub Pages works 100% standalone
+    function draftClientSide(inputs) {
+      const stopAndAsk = [];
+      if (!inputs.url || !inputs.flow) {
+        stopAndAsk.push({ code: 'MISSING_FLOW_OR_URL', question: 'URL or Flow is missing.' });
+      }
+      if (!inputs.env || !['dev', 'staging', 'prod'].includes(inputs.env)) {
+        stopAndAsk.push({ code: 'MISSING_ENV', question: 'ENV is missing or unclear. Please specify ENV (dev | staging | prod). I will not default to prod.' });
+      }
+      if (!inputs.expectedResults || inputs.expectedResults.length === 0) {
+        stopAndAsk.push({ code: 'MISSING_EXPECTED_RESULTS', question: 'Expected results are missing or unclear.' });
+      }
+      const combined = (inputs.flow + ' ' + (inputs.expectedResults || []).join(' ')).toLowerCase();
+      if (inputs.env === 'prod' && /(place order|order placement|sign-up|sign up|password reset)/i.test(combined)) {
+        stopAndAsk.push({ code: 'PROD_WRITE_BLOCKED', question: 'Write action on ENV=prod requires explicit confirmation.' });
+      }
+      if (stopAndAsk.length > 0) {
+        return { stopped: true, stopAndAsk };
+      }
+
+      const branchName = formatBranchNameClient(inputs.ticket || 'QAX-0000_Playwright_Draft');
+      const allNums = inputs.expectedResults.map((_, i) => i + 1);
+      const testTable = [
+        { name: 'State Transition: ' + inputs.flow, technique: 'State Transition', expectedResultNumbers: allNums, platform: inputs.platform },
+        { name: 'Decision Table: valid option combination for ' + inputs.flow, technique: 'Decision Table', expectedResultNumbers: allNums, platform: inputs.platform }
+      ];
+
+      const needsSkip = inputs.platform === 'web-local';
+      const specCode = [
+        "import { test, expect" + (needsSkip ? ", skipIfMobile" : "") + " } from '../utils/fixtures.js';",
+        "import { TEST_DATA } from '../utils/test-data.js';",
+        "import { getSku } from '../utils/sku.js';",
+        "",
+        "test.describe(" + JSON.stringify(inputs.ticket + " - " + inputs.flow) + ", () => {",
+        ...testTable.map(row => {
+          const assertions = inputs.expectedResults.map((er, idx) =>
+            "    // Expected Result " + (idx + 1) + ": " + er + "\n    await expect(pdpPage.confirmationRegion.first()).toBeVisible();"
+          ).join("\n\n");
+          return "  test(" + JSON.stringify(row.name + " " + inputs.tag) + ", async ({ pdpPage }" + (needsSkip ? ", testInfo" : "") + ") => {\n" +
+            (needsSkip ? "    skipIfMobile(testInfo);\n" : "") +
+            "    await pdpPage.openTargetPage(" + JSON.stringify(inputs.url) + ");\n" +
+            "    await pdpPage.submitPrimaryAction();\n\n" +
+            assertions + "\n  });";
+        }),
+        "});"
+      ].join("\n");
+
+      const poCode = SCAFFOLD_TEMPLATES['page-objects/storefront/base.page.ts'] + "\n\n// Storefront PDP Page Object\nexport class PdpPage extends BaseStorefrontPage {}";
+      return {
+        stopped: false,
+        draftResult: {
+          filesChanged: ['page-objects/storefront/pdp.page.ts (browser preview)', 'tests/pdp-add-to-cart.spec.ts (browser preview)'],
+          specRelativePath: 'tests/pdp-add-to-cart.spec.ts',
+          pageObjectRelativePath: 'page-objects/storefront/pdp.page.ts',
+          specCode,
+          pageObjectCode: poCode,
+          testTable,
+          candidateAssertions: [
+            { id: 'CAND-1', description: 'Verify primary page heading remains visible', suggestedAssertionCode: 'await expect(pdpPage.productHeading).toBeVisible();' }
+          ]
+        },
+        summary: {
+          branchName,
+          outputSummaryMarkdown: '## Output Summary\n- Branch: `' + branchName + '`\n- Platform: `' + inputs.platform + '`\n- ENV: `' + inputs.env + '`',
+          mrDescriptionMarkdown: '## MR Description\n- Flow: ' + inputs.flow + '\n- Ticket: ' + inputs.ticket
+        }
+      };
+    }
+
+    async function runDraft(writeFiles, runVerify) {
+      const expectedLines = document.getElementById('expectedInput').value
+        .split(/\r?\n/)
+        .map(l => l.replace(/^\d+\.\s*/, '').trim())
+        .filter(Boolean);
+
+      const inputs = {
+        url: document.getElementById('urlInput').value,
+        flow: document.getElementById('flowInput').value,
+        platform: document.getElementById('platformInput').value,
+        env: document.getElementById('envInput').value,
+        accountNeeded: document.getElementById('accountInput').value,
+        tag: document.getElementById('tagInput').value,
+        ticket: document.getElementById('ticketInput').value,
+        expectedResults: expectedLines,
+        repoPath: document.getElementById('repoPath').value,
+        scopeSelector: document.getElementById('customScope').value,
+        selectedElementIndices: selectedElementIndices.length > 0 ? selectedElementIndices : undefined,
+        confirmedCandidateAssertions: Array.from(confirmedCandidateCodes)
+      };
+
+      let data;
+      if (isLocalServerAvailable) {
+        const res = await fetch('/api/draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            inputs,
+            writeFiles,
+            useCachedScrape: true,
+            runVerify
+          })
+        });
+        data = await res.json();
+      } else {
+        data = draftClientSide(inputs);
+      }
+
+      if (data.stopped) {
+        const items = (data.stopAndAsk || []).map(s => '<li><strong>[' + s.code + ']</strong> ' + escapeHtml(s.question) + '</li>').join('');
+        document.getElementById('alertBox').innerHTML =
+          '<div class="alert stop"><strong>STOP AND ASK — Drafting Halted:</strong><ul style="margin:6px 0 0 0;">' + items + '</ul></div>';
+        return;
+      }
+
+      document.getElementById('alertBox').innerHTML =
+        '<div class="alert ok">' +
+        (writeFiles && isLocalServerAvailable ? 'Draft written to repository: ' + data.draftResult.filesChanged.join(', ') : 'Preview generated (' + (isLocalServerAvailable ? 'click "Write Draft to Repo" to save' : 'click "Download Spec & POM" or copy below') + ').') +
+        '</div>';
+
+      document.getElementById('branchBadge').textContent = data.summary.branchName;
+      document.getElementById('specPathLabel').textContent = data.draftResult.specRelativePath;
+      document.getElementById('poPathLabel').textContent = data.draftResult.pageObjectRelativePath;
+      document.getElementById('specCodeBox').textContent = data.draftResult.specCode;
+      document.getElementById('poCodeBox').textContent = data.draftResult.pageObjectCode;
+      document.getElementById('summaryBox').textContent = data.summary.outputSummaryMarkdown + '\n---\n' + data.summary.mrDescriptionMarkdown;
+
+      const rowsHtml = data.draftResult.testTable.map(r =>
+        '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.technique) + '</td><td>' + r.expectedResultNumbers.join(', ') + '</td><td>' + escapeHtml(r.platform) + '</td></tr>'
+      ).join('');
+      document.getElementById('testTableContainer').innerHTML =
+        '<table><thead><tr><th>Name</th><th>ISTQB Technique</th><th>Expected Result #</th><th>Platform</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+
+      const cands = data.draftResult.candidateAssertions || [];
+      if (cands.length === 0) {
+        document.getElementById('candidatesContainer').innerHTML = '<div style="color:var(--muted);font-size:0.8rem;">No extra candidate assertions detected.</div>';
+      } else {
+        document.getElementById('candidatesContainer').innerHTML = cands.map(c => {
+          const isChecked = confirmedCandidateCodes.has(c.suggestedAssertionCode) ? 'checked' : '';
+          return '<label class="element-item">' +
+            '<input type="checkbox" ' + isChecked + ' onchange="toggleCandidate(' + JSON.stringify(c.suggestedAssertionCode).replace(/"/g, '&quot;') + ', this.checked)" />' +
+            '<div><strong>' + escapeHtml(c.id) + ':</strong> ' + escapeHtml(c.description) + '<br/><code>' + escapeHtml(c.suggestedAssertionCode) + '</code></div>' +
+            '</label>';
+        }).join('');
+      }
+      if (isLocalServerAvailable) inspectRepo();
+    }
+
+    function toggleCandidate(code, checked) {
+      if (checked) confirmedCandidateCodes.add(code);
+      else confirmedCandidateCodes.delete(code);
+    }
+
+    function downloadTextFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function downloadDraftFiles() {
+      const specCode = document.getElementById('specCodeBox').textContent;
+      const poCode = document.getElementById('poCodeBox').textContent;
+      const specName = (document.getElementById('specPathLabel').textContent || 'draft.spec.ts').split('/').pop();
+      const poName = (document.getElementById('poPathLabel').textContent || 'draft.page.ts').split('/').pop();
+      downloadTextFile(specName, specCode);
+      setTimeout(() => downloadTextFile(poName, poCode), 150);
+    }
+
+    function copyText(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    renderScaffoldTemplates();
+    inspectRepo();
+  </script>
+</body>
+</html>
+

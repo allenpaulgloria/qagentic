@@ -1,11 +1,18 @@
-# Playwright
+# Playwright & Test Reports
 node_modules/
 /test-results/
 /playwright-report/
+/allure-results/
+/allure-report/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+.qagentic-cache/
 
-# Environment variables
+# Environment variables & secrets (never commit)
 .env
+.env.keys
+.env.creds
+.env.local
 dist/
+my-test-repo/
