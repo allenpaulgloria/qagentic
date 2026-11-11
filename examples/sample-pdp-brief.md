@@ -9,5 +9,4 @@
   2. Cart badge count updates to match minimum quantity
 - Account needed: none
 - Tag: @smoke
-- Ticket ID and title: QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)
-
+- Ticket ID and title: PROJ-101 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)

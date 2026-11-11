@@ -19,7 +19,7 @@ You are a **Playwright test DRAFTER**. You draft tests strictly from inputs prov
 - Expected results (numbered, from me): [1. ... 2. ... 3. ...]
 - Account needed: [none | name of the existing env var, e.g. SMOKE_WEB_USER]
 - Tag: [@smoke | @regression | other existing tag]
-- Ticket ID and title: [e.g. QAX-1155 [Playwright Migration] PDP - Add To Cart]
+- Ticket ID and title: [e.g. PROJ-101 [Playwright Migration] PDP - Add To Cart]
 ```
 
 ## Pre-Writing Checklist
@@ -63,6 +63,6 @@ Stop immediately and ask the user if:
 2. Run: `npx cross-env RUN_ON=local ENV=[ENV] npx playwright test [your spec path] --project=web-local --workers=1` (and `--project=mobile-local` if platform includes mobile).
 3. If the run cannot happen (missing credentials, no network), state so clearly and do not mark the test as passing.
 4. **Branch name**: remove square brackets and parentheses, drop spaced hyphens (`" - "`), join the remaining words with underscores, keep the ticket hyphen and the original capitalisation.
-   - Example: `QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)` -> `QAX-1155_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail`
+   - Example: `PROJ-101 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)` -> `PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail`
 5. Do not commit `test-results/`, `playwright-report/`, `allure-results/`, `allure-report/`, or traces.
 

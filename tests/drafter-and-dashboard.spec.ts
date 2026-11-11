@@ -18,16 +18,15 @@ import {
 } from '../src/index.js';
 
 test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
-  test('Git branch formatter follows exact QAX-1155 naming specification', () => {
+  test('Git branch formatter follows exact naming specification', () => {
     const raw =
-      'QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)';
+      'PROJ-101 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)';
     expect(formatBranchName(raw)).toBe(
-      'QAX-1155_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
+      'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
     );
   });
 
   test('Stop-and-Ask validator blocks missing ENV (never defaults to prod), missing expected results, prod write actions, and unnamed accounts', () => {
-    // 1. Missing ENV must stop and ask
     const noEnv = validateDrafterInputs({
       url: 'https://example.com/pdp',
       flow: 'Add a 2-option product to cart from PDP',
@@ -35,12 +34,11 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       expectedResults: ['1. Mini cart opens'],
       accountNeeded: 'none',
       tag: '@smoke',
-      ticket: 'QAX-1155 PDP Add To Cart',
+      ticket: 'PROJ-101 PDP Add To Cart',
     });
     expect(noEnv.valid).toBe(false);
     expect(noEnv.stopAndAsk.some((i) => i.code === 'MISSING_ENV')).toBe(true);
 
-    // 2. Write action on prod must stop and ask
     const prodWrite = validateDrafterInputs({
       url: 'https://example.com/checkout',
       flow: 'Complete order placement on checkout',
@@ -49,12 +47,11 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       expectedResults: ['1. Order confirmation is displayed'],
       accountNeeded: 'SMOKE_WEB_USER',
       tag: '@regression',
-      ticket: 'QAX-2000 Checkout Order',
+      ticket: 'PROJ-200 Checkout Order',
     });
     expect(prodWrite.valid).toBe(false);
     expect(prodWrite.stopAndAsk.some((i) => i.code === 'PROD_WRITE_BLOCKED')).toBe(true);
 
-    // 3. Auth flow without named account env var must stop and ask
     const missingAccount = validateDrafterInputs({
       url: 'https://example.com/account',
       flow: 'Sign in and view order history',
@@ -63,7 +60,7 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       expectedResults: ['1. Order history table is visible'],
       accountNeeded: 'none',
       tag: '@smoke',
-      ticket: 'QAX-2001 Order History',
+      ticket: 'PROJ-201 Order History',
     });
     expect(missingAccount.valid).toBe(false);
     expect(missingAccount.stopAndAsk.some((i) => i.code === 'MISSING_ACCOUNT')).toBe(true);
@@ -84,7 +81,7 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       href: '',
     });
     expect(roleBtn.locatorStrategy).toBe('getByRole');
-    expect(roleBtn.recommendedLocator).toContain("getByRole(\"button\", { name: \"Add to Cart\" })");
+    expect(roleBtn.recommendedLocator).toContain('getByRole("button", { name: "Add to Cart" })');
 
     const dataQaFallback = buildRecommendedLocator({
       tagName: 'div',
@@ -115,7 +112,6 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       expect(scaffoldRes.createdFiles).toContain('utils/sku.ts');
       expect(scaffoldRes.createdFiles).toContain('page-objects/storefront/pdp.page.ts');
 
-      // Create a sample Katalon script to verify assertion parity counting
       const katalonPath = path.join(tempDir, 'katalon-pdp.groovy');
       await fs.writeFile(
         katalonPath,
@@ -135,7 +131,7 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
   2. Cart badge count updates to match minimum quantity
 - Account needed: none
 - Tag: @smoke
-- Ticket ID and title: QAX-1155 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)
+- Ticket ID and title: PROJ-101 [Playwright Migration] PDP - Add To Cart - 2 options (dropdown and thumbnail)
 `;
       const parsed = parseMarkdownBrief(briefMd);
       const validated = validateDrafterInputs({
@@ -200,7 +196,6 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
         validateDraftedCodeCompliance(draftResult.pageObjectCode, draftResult.specCode).compliant
       ).toBe(true);
 
-      // Verify candidate assertions include unrequested observations ("Size Guide")
       expect(
         draftResult.candidateAssertions.some((c) => c.description.includes('Size Guide'))
       ).toBe(true);
@@ -218,7 +213,7 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
         verifyRecords
       );
       expect(summary.branchName).toBe(
-        'QAX-1155_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
+        'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
       );
       expect(summary.outputSummaryMarkdown).toContain('### Candidate assertions for you to confirm');
     } finally {
@@ -226,14 +221,13 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
     }
   });
 
-  test('Interactive Dashboard server renders UI, parses Markdown brief, previews ISTQB draft, and enforces Stop-and-Ask', async ({
+  test('Interactive Dashboard server renders 3-Step UI, parses Markdown brief, previews ISTQB draft, and enforces Stop-and-Ask', async ({
     page,
   }) => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'qagentic-dash-'));
     await scaffoldPlaywrightProject(tempDir);
     const server = createDashboardServer(tempDir);
 
-    // Bridge browser requests directly to the dashboard HTTP server instance so tests work even in network-restricted sandboxes.
     await page.route('http://dashboard.local/**', async (route) => {
       const request = route.request();
       const parsedUrl = new URL(request.url());
@@ -287,13 +281,13 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       await page.goto('http://dashboard.local/');
       await expect(page.getByRole('heading', { name: /qagentic/i })).toBeVisible();
 
-      // Click "Load Sample QAX-1155 Brief" and then "Preview Draft"
-      await page.getByRole('button', { name: 'Load Sample QAX-1155 Brief' }).click();
+      await page.getByRole('button', { name: 'Load Example Brief' }).click();
       await page.getByRole('button', { name: 'Preview Draft' }).click();
 
       await expect(page.locator('#branchBadge')).toHaveText(
-        'QAX-1155_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
+        'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
       );
+      await expect(page.locator('#agentPromptBox')).toContainText('You are a Playwright test DRAFTER');
       await expect(page.locator('#specCodeBox')).toContainText('test.describe');
 
       // Clear ENV to trigger Stop-and-Ask alert in Dashboard
@@ -321,7 +315,6 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
           body: staticHtml,
         });
       } else {
-        // Simulate GitHub Pages static hosting where /api/* does not exist (404)
         await route.fulfill({ status: 404, body: 'Not Found' });
       }
     });
@@ -329,26 +322,29 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
     await page.goto('http://github-pages.local/');
     await expect(page.locator('#runtimeModeBadge')).toContainText('Standalone Browser Mode');
 
+    // Verify local-only server controls are hidden in Standalone GitHub Pages Mode
+    await expect(page.locator('#localServerControls')).toBeHidden();
+
     // Test in-browser HTML Snippet Subset Extractor on GitHub Pages
-    await page.getByRole('button', { name: 'Extract from HTML Snippet' }).click();
+    await page.getByRole('button', { name: 'Extract Locators from HTML Snippet' }).click();
     await expect(page.locator('#scrapeMeta')).toContainText('in-browser DOM subset parser');
     await expect(page.locator('#elementsContainer')).toContainText('getByRole("button", { name: "Add to Cart" })');
 
-    // Test in-browser QAX-1155 brief parsing and standalone ISTQB drafting
-    await page.getByRole('button', { name: 'Load Sample QAX-1155 Brief' }).click();
+    // Verify Complete Agent Prompt includes the extracted locators
+    await expect(page.locator('#agentPromptBox')).toContainText('## Extracted Semantic Locators (Selected Subset)');
+
+    // Test in-browser example brief parsing and standalone ISTQB drafting
+    await page.getByRole('button', { name: 'Load Example Brief' }).click();
     await page.getByRole('button', { name: 'Preview Draft' }).click();
     await expect(page.locator('#branchBadge')).toHaveText(
-      'QAX-1155_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
+      'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
     );
 
-    // Navigate across Home Page tabs (Scaffolder Templates, Agent Skill, CLI & GitHub Pages Guide)
+    // Navigate across Home Page tabs
     await page.getByRole('button', { name: 'Project Scaffolder Files' }).click();
     await expect(page.locator('#scaffoldTemplatesContainer')).toContainText('utils/fixtures.ts');
 
     await page.getByRole('button', { name: 'Agent Skill & Prompt' }).click();
     await expect(page.locator('#blankBriefTemplate')).toContainText('## Inputs (I fill these in)');
-
-    await page.getByRole('button', { name: 'CLI & GitHub Pages Guide' }).click();
-    await expect(page.locator('#tab-docs')).toContainText('Publishing This Home Page via GitHub Pages');
   });
 });

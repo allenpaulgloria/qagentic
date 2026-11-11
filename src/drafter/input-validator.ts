@@ -110,7 +110,7 @@ export function parseMarkdownBrief(markdown: string): Partial<DrafterInputs> {
   result.accountNeeded = extractSingleLine(/-\s*Account needed\s*:\s*(.+)/i);
   result.tag = extractSingleLine(/-\s*Tag\s*:\s*(.+)/i);
 
-  // For ticket ID and title, keep brackets inside the ticket title if provided (e.g. QAX-1155 [Playwright Migration] PDP - Add To Cart)
+  // For ticket ID and title, keep brackets inside the ticket title if provided (e.g. PROJ-101 [Playwright Migration] PDP - Add To Cart)
   const ticketMatch = markdown.match(/-\s*Ticket ID and title\s*:\s*(.+)/i);
   if (ticketMatch && ticketMatch[1]) {
     const rawTicket = ticketMatch[1].trim();
@@ -262,7 +262,7 @@ export function validateDrafterInputs(inputs: Partial<DrafterInputs>): Validatio
       expectedResults,
       accountNeeded: accountNeeded || 'none',
       tag: rawTag,
-      ticket: (inputs.ticket || 'QAX-0000 Playwright Draft').trim(),
+      ticket: (inputs.ticket || 'PROJ-101 Playwright Draft').trim(),
       repoPath: inputs.repoPath,
       scopeSelector: inputs.scopeSelector,
       rolesFilter: inputs.rolesFilter,
