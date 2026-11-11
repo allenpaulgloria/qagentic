@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -16,23 +16,34 @@ concurrency:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Pages
+        id: pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload static site artifact from ./docs
+        if: steps.pages.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: './docs'
 
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4
 
+      - name: Instructions if GitHub Pages is not yet enabled in Repo Settings
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "### Action Required: Enable GitHub Pages in Repository Settings" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to **https://github.com/${{ github.repository }}/settings/pages**" >> $GITHUB_STEP_SUMMARY
+          echo "2. Under **Build and deployment -> Source**, select **GitHub Actions** (or **Deploy from a branch -> main -> /docs**)." >> $GITHUB_STEP_SUMMARY
+          echo "3. Re-run this workflow to publish your site." >> $GITHUB_STEP_SUMMARY
+          echo "Notice: GitHub Pages is not enabled yet in repo settings. Open https://github.com/${{ github.repository }}/settings/pages and set Source to 'GitHub Actions'."
