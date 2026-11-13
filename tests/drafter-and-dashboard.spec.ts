@@ -374,8 +374,12 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       });
     });
 
-    await page.getByRole('button', { name: 'Google AI Studio Key' }).click();
+    await page.getByRole('button', { name: /Bring Your Own API Key/i }).click();
+    // Verify multi-provider key auto-detection (e.g. sk- switches to OpenAI, AIza switches back to Gemini 3.8 Flash default)
+    await page.locator('#geminiApiKeyInput').fill('sk-test-openai-key-123');
+    await expect(page.locator('#geminiModelSelect')).toHaveValue('openai:gpt-4o-mini');
     await page.locator('#geminiApiKeyInput').fill('AIzaSyTestLocalStorageKey123');
+    await expect(page.locator('#geminiModelSelect')).toHaveValue('gemini-3.8-flash');
     await page.getByRole('button', { name: 'Save Key to Browser' }).click();
     await expect(page.locator('#aiKeyStatusBadge')).toHaveText('AI Engine: Gemini 3.8 Flash Active');
 

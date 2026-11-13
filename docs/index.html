@@ -3,174 +3,243 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qagentic — QA Automation &amp; Test Design Studio</title>
+  <title>qagentic 95 — QA Automation &amp; Test Design Studio</title>
   <style>
     :root {
-      --bg: #0b1120;
-      --panel: #1e293b;
-      --panel-alt: #0f172a;
-      --border: #334155;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --success: #22c55e;
-      --danger: #ef4444;
+      --bg: #008080;
+      --panel: #c0c0c0;
+      --panel-alt: #ffffff;
+      --border: #808080;
+      --text: #000000;
+      --muted: #333333;
+      --accent: #000080;
+      --accent-hover: #1084d0;
+      --success: #008000;
+      --danger: #a80000;
+      --win-bevel-out: inset -1px -1px 0 #000000, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #dfdfdf;
+      --win-bevel-in: inset -1px -1px 0 #ffffff, inset 1px 1px 0 #808080, inset -2px -2px 0 #dfdfdf, inset 2px 2px 0 #000000;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: "MS Sans Serif", Tahoma, "Segoe UI", Geneva, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.55;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    body.is-busy, body.is-busy * {
+      cursor: wait !important;
     }
     .topbar {
-      padding: 14px 28px;
-      border-bottom: 1px solid var(--border);
+      padding: 6px 12px;
+      background: var(--panel);
+      box-shadow: var(--win-bevel-out);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(11, 17, 32, 0.94);
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
     .brand h1 {
       margin: 0;
-      font-size: 1.15rem;
-      letter-spacing: -0.01em;
+      font-size: 0.95rem;
+      padding: 3px 10px;
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #ffffff;
+      box-shadow: var(--win-bevel-out);
+      letter-spacing: 0.02em;
     }
     .badge {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--accent);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 600;
+      background: #dfdfdf;
+      color: #000000;
+      box-shadow: var(--win-bevel-in);
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
     }
     .badge.mode-local {
-      background: rgba(34, 197, 94, 0.15);
-      color: #4ade80;
-      border-color: rgba(34, 197, 94, 0.4);
+      background: #d8f8d8;
+      color: #005500;
     }
     .badge.mode-gh {
-      background: rgba(168, 85, 247, 0.15);
-      color: #c084fc;
-      border-color: rgba(168, 85, 247, 0.4);
+      background: #e6e6fa;
+      color: #000080;
     }
     .api-drawer {
       max-width: 980px;
-      margin: 14px auto 0 auto;
-      padding: 14px 20px;
+      margin: 12px auto 0 auto;
+      padding: 12px 14px;
       background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      box-shadow: var(--win-bevel-out);
       display: none;
     }
     .api-drawer.open {
       display: block;
     }
+    .win-titlebar {
+      background: linear-gradient(90deg, #000080, #1084d0);
+      color: #ffffff;
+      padding: 4px 8px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: -18px -18px 14px -18px;
+      user-select: none;
+    }
+    .win-controls {
+      display: inline-flex;
+      gap: 2px;
+    }
+    .win-controls span {
+      display: inline-block;
+      width: 15px;
+      height: 14px;
+      line-height: 12px;
+      text-align: center;
+      background: #c0c0c0;
+      color: #000000;
+      font-size: 10px;
+      font-weight: 700;
+      box-shadow: var(--win-bevel-out);
+    }
     .container {
       max-width: 980px;
       margin: 0 auto;
-      padding: 32px 20px 72px 20px;
+      padding: 20px 16px 64px 16px;
     }
 
-    /* Intent-First Launcher */
+    /* Prominent Windows 95 Busy / Working Status Dialog */
+    #busyBanner {
+      display: none;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      background: var(--panel);
+      box-shadow: var(--win-bevel-out);
+      border: 1px solid #000;
+    }
+    #busyBanner.active {
+      display: block;
+    }
+    .win95-progress-track {
+      margin-top: 8px;
+      height: 20px;
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
+      padding: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .win95-progress-bar {
+      height: 100%;
+      width: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        #000080 0px,
+        #000080 12px,
+        #ffffff 12px,
+        #ffffff 15px
+      );
+      animation: win95Slide 1.2s linear infinite;
+    }
+    @keyframes win95Slide {
+      0% { transform: translateX(-30%); }
+      100% { transform: translateX(0%); }
+    }
+
+    /* Intent-First Launcher (Windows 95 Dialog Window) */
     .launcher-card {
-      background: linear-gradient(145deg, #1e293b, #0f172a);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 28px;
-      text-align: center;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      background: var(--panel);
+      box-shadow: var(--win-bevel-out);
+      padding: 18px;
+      text-align: left;
     }
     .launcher-title {
-      margin: 0 0 6px 0;
-      font-size: 1.65rem;
-      font-weight: 800;
+      margin: 0 0 4px 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #000080;
     }
     .launcher-subtitle {
-      margin: 0 0 24px 0;
+      margin: 0 0 14px 0;
       color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 0.85rem;
     }
     .intent-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 24px;
+      gap: 10px;
+      margin-bottom: 16px;
       text-align: left;
     }
     @media (max-width: 768px) {
       .intent-grid { grid-template-columns: 1fr; }
     }
     .intent-option {
-      background: var(--panel-alt);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 16px;
+      background: var(--panel);
+      box-shadow: var(--win-bevel-out);
+      padding: 12px;
       cursor: pointer;
-      transition: all 0.16s ease;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
     .intent-option:hover {
-      border-color: rgba(56, 189, 248, 0.6);
-      transform: translateY(-2px);
+      background: #dfdfdf;
     }
     .intent-option.selected {
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.1);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
+      outline: 1px dotted #000000;
+      outline-offset: -4px;
     }
     .intent-option strong {
-      font-size: 1rem;
-      color: var(--text);
+      font-size: 0.92rem;
+      color: #000080;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .intent-option span {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.35;
     }
     .url-bar {
       display: flex;
-      gap: 10px;
-      max-width: 760px;
-      margin: 0 auto;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
     }
     .url-bar input[type="text"] {
       flex: 1;
       min-width: 240px;
-      padding: 12px 14px;
-      font-size: 0.92rem;
-      border-radius: 8px;
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      color: var(--text);
+      padding: 7px 9px;
+      font-size: 0.88rem;
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
+      border: none;
+      color: #000000;
     }
     .url-bar button {
-      padding: 12px 22px;
-      font-size: 0.9rem;
-      border-radius: 8px;
+      padding: 7px 18px;
+      font-size: 0.86rem;
     }
 
     /* Progressive Workspace Panels */
     #progressiveWorkspace {
-      margin-top: 28px;
+      margin-top: 18px;
       display: none;
     }
     #progressiveWorkspace.visible {
@@ -184,180 +253,183 @@
     }
     .card {
       background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 22px;
-      margin-bottom: 20px;
+      box-shadow: var(--win-bevel-out);
+      padding: 18px;
+      margin-bottom: 18px;
     }
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 14px;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #808080;
     }
     .card-title {
       margin: 0;
-      font-size: 1.05rem;
-      color: var(--accent);
+      font-size: 0.98rem;
+      color: #000080;
     }
     .card-desc {
-      margin: 4px 0 0 0;
-      font-size: 0.84rem;
+      margin: 3px 0 0 0;
+      font-size: 0.8rem;
       color: var(--muted);
     }
     label {
       display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
+      font-size: 0.8rem;
+      font-weight: 700;
       color: var(--text);
       margin-bottom: 4px;
-      margin-top: 12px;
+      margin-top: 10px;
     }
     .hint {
       font-weight: 400;
       color: var(--muted);
-      font-size: 0.76rem;
-      margin-left: 6px;
+      font-size: 0.75rem;
+      margin-left: 5px;
     }
     input[type="text"], input[type="password"], select, textarea {
       width: 100%;
-      padding: 9px 11px;
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 0.86rem;
+      padding: 6px 8px;
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
+      border: none;
+      color: #000000;
+      font-size: 0.84rem;
       font-family: inherit;
     }
     textarea {
-      font-family: "JetBrains Mono", Consolas, monospace;
+      font-family: "Courier New", Consolas, monospace;
       resize: vertical;
     }
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 12px;
     }
     .row-3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
+      gap: 12px;
     }
     @media (max-width: 768px) {
       .row, .row-3 { grid-template-columns: 1fr; }
     }
     .btn-row {
       display: flex;
-      gap: 10px;
-      margin-top: 14px;
+      gap: 8px;
+      margin-top: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
     button {
-      padding: 8px 15px;
-      border-radius: 7px;
-      border: 1px solid transparent;
-      font-size: 0.84rem;
-      font-weight: 600;
+      padding: 5px 12px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: inherit;
       cursor: pointer;
-      background: var(--accent);
-      color: #0b1120;
-      transition: 0.15s;
+      background: #c0c0c0;
+      color: #000000;
+      box-shadow: var(--win-bevel-out);
     }
-    button:hover {
-      background: var(--accent-hover);
-      color: #fff;
+    button:hover:not(:disabled) {
+      background: #dfdfdf;
+    }
+    button:active:not(:disabled) {
+      box-shadow: var(--win-bevel-in);
+      padding: 6px 11px 4px 13px;
+    }
+    button:disabled {
+      color: #808080;
+      text-shadow: 1px 1px 0 #ffffff;
+      cursor: not-allowed;
     }
     button.secondary {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--text);
-    }
-    button.secondary:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+      background: #c0c0c0;
+      color: #000000;
     }
     button.success {
-      background: var(--success);
-      color: #052e16;
+      background: #c0c0c0;
+      color: #000080;
+      outline: 1px solid #000000;
     }
     .branch-bar {
       margin-top: 8px;
-      padding: 8px 12px;
-      background: var(--panel-alt);
-      border: 1px dashed var(--border);
-      border-radius: 6px;
+      padding: 6px 10px;
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
-      font-size: 0.8rem;
+      font-size: 0.79rem;
     }
     .branch-bar code {
-      color: var(--accent);
-      font-weight: 600;
+      color: #000080;
+      font-weight: 700;
     }
     details {
       margin-top: 12px;
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 14px;
+      background: var(--panel);
+      box-shadow: var(--win-bevel-out);
+      padding: 8px 12px;
     }
     summary {
       cursor: pointer;
-      font-size: 0.83rem;
-      font-weight: 600;
-      color: var(--accent);
+      font-size: 0.81rem;
+      font-weight: 700;
+      color: #000080;
     }
     .alert {
-      padding: 13px 16px;
-      border-radius: 8px;
-      margin-bottom: 16px;
-      font-size: 0.86rem;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 0.83rem;
+      box-shadow: var(--win-bevel-out);
     }
     .alert.stop {
-      background: rgba(239, 68, 68, 0.14);
-      border: 1px solid var(--danger);
-      color: #fecaca;
+      background: #fff0f0;
+      border: 2px solid var(--danger);
+      color: #660000;
     }
     .alert.ok {
-      background: rgba(34, 197, 94, 0.14);
-      border: 1px solid var(--success);
-      color: #bbf7d0;
+      background: #ffffe1;
+      border: 1px solid #000000;
+      color: #000000;
     }
     .element-list {
       max-height: 220px;
       overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--panel-alt);
-      padding: 8px;
+      box-shadow: var(--win-bevel-in);
+      background: #ffffff;
+      padding: 6px;
       margin-top: 8px;
     }
     .element-item {
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      padding: 6px 4px;
-      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-      font-size: 0.8rem;
+      padding: 5px 4px;
+      border-bottom: 1px dotted #808080;
+      font-size: 0.79rem;
       margin: 0;
     }
     .element-item code {
-      color: #38bdf8;
+      color: #000080;
       word-break: break-all;
     }
     pre {
-      background: var(--panel-alt);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
+      padding: 12px;
       overflow-x: auto;
-      font-size: 0.81rem;
+      font-size: 0.8rem;
+      font-family: "Courier New", Consolas, monospace;
+      color: #000000;
       margin: 8px 0 0 0;
       max-height: 420px;
       white-space: pre-wrap;
@@ -365,31 +437,35 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       margin-top: 8px;
+      background: #ffffff;
+      box-shadow: var(--win-bevel-in);
     }
     th, td {
-      border: 1px solid var(--border);
-      padding: 8px 10px;
+      border: 1px solid #808080;
+      padding: 6px 8px;
       text-align: left;
+      color: #000000;
     }
     th {
-      background: var(--panel-alt);
-      color: var(--muted);
+      background: #c0c0c0;
+      color: #000000;
+      box-shadow: var(--win-bevel-out);
     }
     .toast {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--success);
-      color: #052e16;
-      padding: 10px 18px;
-      border-radius: 8px;
+      bottom: 20px;
+      right: 20px;
+      background: #ffffe1;
+      color: #000000;
+      border: 1px solid #000000;
+      box-shadow: 2px 2px 0 #000000;
+      padding: 8px 14px;
       font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       display: none;
       z-index: 100;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
   </style>
 </head>
@@ -398,40 +474,43 @@
 
   <header class="topbar">
     <div class="brand">
-      <h1>qagentic</h1>
+      <h1>qagentic95.exe</h1>
       <span id="runtimeModeBadge" class="badge mode-gh">Standalone Browser Mode</span>
-      <span id="aiKeyStatusBadge" class="badge" style="cursor:pointer;" onclick="toggleApiKeyDrawer()">AI Engine: Template Mode (Add AI Studio Key)</span>
+      <span id="aiKeyStatusBadge" class="badge" style="cursor:pointer;" onclick="toggleApiKeyDrawer()">AI Engine: Template Mode (Add API Key)</span>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
-      <button type="button" class="secondary" style="padding:5px 12px;font-size:0.78rem;" onclick="toggleApiKeyDrawer()">Google AI Studio Key</button>
-      <button type="button" class="secondary" style="padding:5px 12px;font-size:0.78rem;" onclick="loadSamplePdpBrief()">Load Example</button>
+      <button type="button" class="secondary" onclick="toggleApiKeyDrawer()">Bring Your Own API Key (Google AI Studio)</button>
+      <button type="button" class="secondary" onclick="loadSamplePdpBrief()">Load Example</button>
     </div>
   </header>
 
-  <!-- Collapsible Google AI Studio API Key Drawer (Stored in localStorage only) -->
-  <div style="padding: 0 20px;">
+  <!-- Collapsible Top BYOK Drawer: Accepts Google AI Studio (Default), OpenAI, Anthropic, Groq, or OpenRouter -->
+  <div style="padding: 0 16px;">
     <section id="apiKeyDrawer" class="api-drawer" aria-label="Google AI Studio API Key Settings">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
-        <div>
-          <strong style="font-size:0.9rem; color:var(--accent);">Bring Your Own API Key (Google AI Studio — Gemini 3.8 Flash)</strong>
-          <div style="font-size:0.78rem; color:var(--muted);">
-            <strong>Coworker &amp; Demo Friendly:</strong> Your key is saved strictly in <em>your own browser's</em> <code>localStorage</code> — never sent to GitHub or shared with other visitors. Grab a free key in 10 seconds at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">aistudio.google.com/apikey</a>.
-          </div>
-        </div>
+      <div class="win-titlebar" style="margin: -12px -14px 10px -14px;">
+        <span>🔑 Bring Your Own API Key (Google AI Studio Default — Also Accepts OpenAI, Claude, Groq &amp; OpenRouter)</span>
+        <div class="win-controls"><span onclick="toggleApiKeyDrawer()" style="cursor:pointer;">X</span></div>
+      </div>
+      <div style="font-size:0.78rem; color:var(--muted); margin-bottom:8px;">
+        <strong>Coworker &amp; Demo Friendly:</strong> Paste <em>any</em> API key below! Google AI Studio (<code>AIza...</code>) is the default (<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">get a free key here</a>), or paste an OpenAI (<code>sk-...</code>), Anthropic (<code>sk-ant-...</code>), Groq (<code>gsk_...</code>), or OpenRouter (<code>sk-or-...</code>) key. Stored strictly in your own browser's <code>localStorage</code>.
       </div>
       <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <input
           type="password"
           id="geminiApiKeyInput"
-          placeholder="Paste your own Google AI Studio API Key (AIza...)"
+          placeholder="Paste API Key: AIza... (Google AI Studio default), sk-..., sk-ant-..., gsk_..."
           style="flex:1; min-width:240px;"
+          oninput="autoDetectProviderUI()"
         />
         <button type="button" class="secondary" onclick="toggleApiKeyVisibility()" id="toggleKeyVisBtn">Show</button>
-        <select id="geminiModelSelect" aria-label="Gemini Model" style="width:auto; min-width:190px;">
-          <option value="gemini-3.8-flash" selected>gemini-3.8-flash (Default)</option>
-          <option value="gemini-3.8-flash-lite">gemini-3.8-flash-lite</option>
-          <option value="gemini-3.8-pro">gemini-3.8-pro</option>
-          <option value="gemini-2.5-flash">gemini-2.5-flash (Legacy)</option>
+        <select id="geminiModelSelect" aria-label="AI Provider &amp; Model" style="width:auto; min-width:230px;">
+          <option value="gemini-3.8-flash" selected>Google AI Studio: gemini-3.8-flash (Default)</option>
+          <option value="gemini-3.8-flash-lite">Google AI Studio: gemini-3.8-flash-lite</option>
+          <option value="gemini-3.8-pro">Google AI Studio: gemini-3.8-pro</option>
+          <option value="openai:gpt-4o-mini">OpenAI: gpt-4o-mini</option>
+          <option value="anthropic:claude-3-5-sonnet-latest">Anthropic: claude-3-5-sonnet-latest</option>
+          <option value="groq:llama-3.3-70b-versatile">Groq: llama-3.3-70b-versatile</option>
+          <option value="openrouter:google/gemini-2.5-flash">OpenRouter: google/gemini-2.5-flash</option>
         </select>
         <button type="button" class="success" onclick="saveGeminiApiKey()">Save Key to Browser</button>
         <button type="button" class="secondary" onclick="clearGeminiApiKey()">Clear Key</button>
@@ -442,6 +521,10 @@
   <main class="container">
     <!-- INTENT LAUNCHER: "What would you like to do?" + 3 Options + URL Input -->
     <section class="launcher-card" aria-label="What would you like to do?">
+      <div class="win-titlebar">
+        <span>🖥️ qagentic 95 — QA Automation &amp; Test Design Wizard</span>
+        <div class="win-controls"><span>_</span><span>□</span><span>X</span></div>
+      </div>
       <h2 class="launcher-title">What would you like to do?</h2>
       <p class="launcher-subtitle">Choose a workflow and enter your target URL to get started.</p>
 
@@ -493,15 +576,24 @@
         />
         <button type="button" id="startWorkflowBtn" onclick="startSelectedWorkflow()">Continue</button>
       </div>
-
-      <div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:0.79rem; color:var(--muted);">
-        <span><strong>Trying this out with coworkers?</strong> Everyone can plug in their own free Google AI Studio key locally in their browser.</span>
-        <button type="button" class="secondary" style="padding:4px 10px; font-size:0.76rem;" onclick="toggleApiKeyDrawer()">Bring Your Own API Key</button>
-      </div>
     </section>
 
     <!-- PROGRESSIVE WORKSPACE: Expands smoothly with only the chosen mode -->
     <div id="progressiveWorkspace">
+      <!-- Prominent Windows 95 Busy / Working Status Dialog so the user knows qagentic is working -->
+      <div id="busyBanner" role="status" aria-live="polite">
+        <div class="win-titlebar" style="margin: -14px -16px 10px -16px;">
+          <span>⏳ Please Wait — qagentic95.exe is Working...</span>
+          <div class="win-controls"><span>_</span></div>
+        </div>
+        <div id="busyMessageText" style="font-weight:700; color:#000080;">
+          ⏳ Generating test artifacts... Please do not interrupt or close this window.
+        </div>
+        <div class="win95-progress-track">
+          <div class="win95-progress-bar"></div>
+        </div>
+      </div>
+
       <div id="alertBox"></div>
 
       <!-- =================================================================== -->
@@ -813,6 +905,41 @@ Quantity input (min 1, max 10)</textarea>
       }
     }
 
+    function detectProviderModelFromKey(rawKey, currentSelectValue) {
+      const k = String(rawKey || '').trim();
+      if (k.startsWith('sk-ant-')) return 'anthropic:claude-3-5-sonnet-latest';
+      if (k.startsWith('gsk_')) return 'groq:llama-3.3-70b-versatile';
+      if (k.startsWith('sk-or-')) return 'openrouter:google/gemini-2.5-flash';
+      if (k.startsWith('sk-')) return 'openai:gpt-4o-mini';
+      if (currentSelectValue && !currentSelectValue.includes(':')) return currentSelectValue;
+      return DEFAULT_GEMINI_MODEL;
+    }
+
+    function autoDetectProviderUI() {
+      const inp = document.getElementById('geminiApiKeyInput');
+      const sel = document.getElementById('geminiModelSelect');
+      if (!inp || !sel) return;
+      const detected = detectProviderModelFromKey(inp.value, sel.value);
+      sel.value = detected;
+    }
+
+    function setWorkingState(isBusy, statusMessage) {
+      const banner = document.getElementById('busyBanner');
+      const msgBox = document.getElementById('busyMessageText');
+      if (banner) {
+        banner.classList.toggle('active', Boolean(isBusy));
+      }
+      if (msgBox && statusMessage) {
+        msgBox.textContent = '⏳ ' + statusMessage;
+      }
+      document.body.classList.toggle('is-busy', Boolean(isBusy));
+      const actionBtnIds = ['startWorkflowBtn', 'generateTcBtn', 'previewDraftBtn', 'writeRepoBtn', 'generateExpBtn'];
+      actionBtnIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.disabled = Boolean(isBusy);
+      });
+    }
+
     function refreshAiKeyStatusUI() {
       const key = getSavedGeminiKey();
       const model = getSavedGeminiModel();
@@ -822,10 +949,20 @@ Quantity input (min 1, max 10)</textarea>
       if (input && key) input.value = key;
       if (modelSelect && model) modelSelect.value = model;
       if (key) {
-        badge.textContent = 'AI Engine: Gemini 3.8 Flash Active';
+        if (model.startsWith('openai:')) {
+          badge.textContent = 'AI Engine: OpenAI Active';
+        } else if (model.startsWith('anthropic:')) {
+          badge.textContent = 'AI Engine: Claude Active';
+        } else if (model.startsWith('groq:')) {
+          badge.textContent = 'AI Engine: Groq Active';
+        } else if (model.startsWith('openrouter:')) {
+          badge.textContent = 'AI Engine: OpenRouter Active';
+        } else {
+          badge.textContent = 'AI Engine: Gemini 3.8 Flash Active';
+        }
         badge.className = 'badge mode-local';
       } else {
-        badge.textContent = 'AI Engine: Template Mode (Add AI Studio Key)';
+        badge.textContent = 'AI Engine: Template Mode (Add API Key)';
         badge.className = 'badge';
       }
     }
@@ -863,9 +1000,11 @@ Quantity input (min 1, max 10)</textarea>
 
     function saveGeminiApiKey() {
       const val = document.getElementById('geminiApiKeyInput').value.trim();
-      const modelVal = (document.getElementById('geminiModelSelect')?.value || DEFAULT_GEMINI_MODEL).trim();
+      const selectEl = document.getElementById('geminiModelSelect');
+      const modelVal = detectProviderModelFromKey(val, selectEl ? selectEl.value : DEFAULT_GEMINI_MODEL);
+      if (selectEl) selectEl.value = modelVal;
       if (!val) {
-        showToast('Please paste a valid Google AI Studio API key.');
+        showToast('Please paste a valid API key.');
         return;
       }
       try {
@@ -874,7 +1013,7 @@ Quantity input (min 1, max 10)</textarea>
       } catch {}
       refreshAiKeyStatusUI();
       document.getElementById('apiKeyDrawer').classList.remove('open');
-      showToast('Google AI Studio Key saved to browser localStorage!');
+      showToast('API Key saved to browser localStorage!');
     }
 
     function clearGeminiApiKey() {
@@ -891,7 +1030,75 @@ Quantity input (min 1, max 10)</textarea>
       const apiKey = getSavedGeminiKey();
       if (!apiKey) return null;
 
-      const selectedModel = (document.getElementById('geminiModelSelect')?.value || getSavedGeminiModel() || DEFAULT_GEMINI_MODEL).trim();
+      const selectedModel = detectProviderModelFromKey(
+        apiKey,
+        (document.getElementById('geminiModelSelect')?.value || getSavedGeminiModel() || DEFAULT_GEMINI_MODEL).trim()
+      );
+
+      // 1. OpenAI / Groq / OpenRouter (OpenAI-compatible Chat Completions)
+      if (selectedModel.startsWith('openai:') || selectedModel.startsWith('groq:') || selectedModel.startsWith('openrouter:')) {
+        const [provider, modelId] = selectedModel.split(':');
+        const endpoint =
+          provider === 'groq'
+            ? 'https://api.groq.com/openai/v1/chat/completions'
+            : provider === 'openrouter'
+              ? 'https://openrouter.ai/api/v1/chat/completions'
+              : 'https://api.openai.com/v1/chat/completions';
+
+        const payload = {
+          model: modelId,
+          temperature: 0.15,
+          messages: [{ role: 'user', content: promptText }]
+        };
+        if (expectJson) {
+          payload.response_format = { type: 'json_object' };
+        }
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error(provider.toUpperCase() + ' API error (' + res.status + '): ' + errBody.slice(0, 220));
+        }
+        const data = await res.json();
+        const text = data?.choices?.[0]?.message?.content || '';
+        if (!text) return null;
+        return expectJson ? JSON.parse(text) : text;
+      }
+
+      // 2. Anthropic Claude (Direct Browser Access)
+      if (selectedModel.startsWith('anthropic:')) {
+        const modelId = selectedModel.split(':')[1] || 'claude-3-5-sonnet-latest';
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: modelId,
+            max_tokens: 2048,
+            messages: [{ role: 'user', content: promptText }]
+          })
+        });
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error('Anthropic API error (' + res.status + '): ' + errBody.slice(0, 220));
+        }
+        const data = await res.json();
+        const text = data?.content?.[0]?.text || '';
+        if (!text) return null;
+        return expectJson ? JSON.parse(text) : text;
+      }
+
+      // 3. Default: Google AI Studio (Gemini 3.8 Flash)
       const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(selectedModel) + ':generateContent?key=' + encodeURIComponent(apiKey);
       const generationConfig = {
         temperature: 0.15
@@ -1013,7 +1220,8 @@ Quantity input (min 1, max 10)</textarea>
 
       if (getSavedGeminiKey()) {
         try {
-          document.getElementById('generateTcBtn').textContent = 'Synthesizing with Gemini...';
+          setWorkingState(true, 'qagentic95.exe is synthesizing thorough ISTQB test cases with AI... Buttons are locked so generation is not interrupted.');
+          document.getElementById('generateTcBtn').textContent = 'Synthesizing Test Cases...';
           const aiPrompt = [
             'You are a Senior ISTQB Test Architect. Generate a thorough set of 6 to 10 functional test cases in JSON format: { "cases": [ { "id": "TC-001", "technique": "EP | BVA | Decision Table | State Transition | Error Guessing", "title": "...", "preconditions": "...", "steps": "1. ...\\n2. ...", "expected": "..." } ] }.',
             'Target URL: ' + url,
@@ -1030,6 +1238,7 @@ Quantity input (min 1, max 10)</textarea>
             '<div class="alert stop">' + escapeHtml(formatFunnyGeminiError(err.message)) + '</div>';
         } finally {
           document.getElementById('generateTcBtn').textContent = 'Generate Test Cases';
+          setWorkingState(false);
         }
       }
 
@@ -1184,7 +1393,8 @@ Quantity input (min 1, max 10)</textarea>
 
       if (getSavedGeminiKey()) {
         try {
-          document.getElementById('generateExpBtn').textContent = 'Generating with Gemini...';
+          setWorkingState(true, 'qagentic95.exe is building your Exploratory Testing Charter... Buttons are locked so generation is not interrupted.');
+          document.getElementById('generateExpBtn').textContent = 'Generating Charter...';
           const aiPrompt = [
             'You are a Principal Exploratory QA Engineer. Create a thorough, actionable Markdown Exploratory Testing Session Sheet for:',
             '- Target URL: ' + url,
@@ -1200,6 +1410,7 @@ Quantity input (min 1, max 10)</textarea>
             '<div class="alert stop">' + escapeHtml(formatFunnyGeminiError(err.message)) + '</div>';
         } finally {
           document.getElementById('generateExpBtn').textContent = 'Generate Exploratory Charter';
+          setWorkingState(false);
         }
       }
 
@@ -1650,7 +1861,8 @@ Quantity input (min 1, max 10)</textarea>
         data = draftClientSide(inputs);
         if (!data.stopped && getSavedGeminiKey()) {
           try {
-            document.getElementById('previewDraftBtn').textContent = 'Drafting with Gemini...';
+            setWorkingState(true, 'qagentic95.exe is drafting your Page Object Model & Playwright Spec... Buttons are locked so generation is not interrupted.');
+            document.getElementById('previewDraftBtn').textContent = 'Drafting Playwright Spec...';
             const pickedLocators = scrapedElements
               .filter(el => selectedElementIndices.includes(el.index))
               .map(el => el.recommendedLocator);
@@ -1682,6 +1894,7 @@ Quantity input (min 1, max 10)</textarea>
               '<div class="alert stop">' + escapeHtml(formatFunnyGeminiError(err.message)) + '</div>';
           } finally {
             document.getElementById('previewDraftBtn').textContent = 'Preview Draft';
+            setWorkingState(false);
           }
         }
       }
