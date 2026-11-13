@@ -300,7 +300,7 @@ export function buildCandidateAssertions(
 
 // I am orchestrating the Playwright Test Drafter to produce compliant Page Objects, ISTQB specs, and candidate assertion reports.
 export class DrafterService {
-  private readonly modelName = 'gemini-2.5-flash';
+  private readonly modelName = 'gemini-3.8-flash';
   private readonly ai: GoogleGenAI | null;
 
   constructor(apiKey?: string) {

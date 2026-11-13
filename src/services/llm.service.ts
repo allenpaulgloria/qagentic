@@ -29,9 +29,9 @@ export interface GeneratedFilesResult {
   suite: SynthesizedTestSuite;
 }
 
-// I am wrapping Gemini 2.5 Flash (gemini-2.5-flash) to synthesize functional test scenarios and generate Playwright Page Object Model code.
+// I am wrapping Gemini 3.8 Flash (gemini-3.8-flash) to synthesize functional test scenarios and generate Playwright Page Object Model code.
 export class LlmService {
-  private readonly modelName = 'gemini-2.5-flash';
+  private readonly modelName = 'gemini-3.8-flash';
   private readonly ai: GoogleGenAI | null;
 
   constructor(apiKey?: string) {

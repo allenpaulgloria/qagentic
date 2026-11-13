@@ -377,7 +377,7 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
     await page.getByRole('button', { name: 'Google AI Studio Key' }).click();
     await page.locator('#geminiApiKeyInput').fill('AIzaSyTestLocalStorageKey123');
     await page.getByRole('button', { name: 'Save Key to Browser' }).click();
-    await expect(page.locator('#aiKeyStatusBadge')).toHaveText('AI Engine: Gemini 2.5 Flash Active');
+    await expect(page.locator('#aiKeyStatusBadge')).toHaveText('AI Engine: Gemini 3.8 Flash Active');
 
     await page.locator('#option-test-cases').click();
     await expect(page.locator('#tcMarkdownBox')).toContainText('TC-AI-001');

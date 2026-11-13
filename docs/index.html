@@ -413,7 +413,7 @@
     <section id="apiKeyDrawer" class="api-drawer" aria-label="Google AI Studio API Key Settings">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
         <div>
-          <strong style="font-size:0.9rem; color:var(--accent);">Google AI Studio API Key (Gemini 2.5 Flash)</strong>
+          <strong style="font-size:0.9rem; color:var(--accent);">Google AI Studio API Key (Gemini 3.8 Flash — Free Tier)</strong>
           <div style="font-size:0.78rem; color:var(--muted);">
             Stored strictly in this browser's <code>localStorage</code> — never committed to Git or visible to other visitors. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">aistudio.google.com/apikey</a>.
           </div>
@@ -426,6 +426,12 @@
           placeholder="Paste your Google AI Studio API Key (AIza...)"
           style="flex:1; min-width:240px;"
         />
+        <select id="geminiModelSelect" aria-label="Gemini Model" style="width:auto; min-width:190px;">
+          <option value="gemini-3.8-flash" selected>gemini-3.8-flash (Default)</option>
+          <option value="gemini-3.8-flash-lite">gemini-3.8-flash-lite</option>
+          <option value="gemini-3.8-pro">gemini-3.8-pro</option>
+          <option value="gemini-2.5-flash">gemini-2.5-flash (Legacy)</option>
+        </select>
         <button type="button" class="success" onclick="saveGeminiApiKey()">Save Key to Browser</button>
         <button type="button" class="secondary" onclick="clearGeminiApiKey()">Clear Key</button>
       </div>
@@ -734,6 +740,8 @@ Quantity input (min 1, max 10)</textarea>
 
   <script>
     const GEMINI_STORAGE_KEY = 'QAGENTIC_GEMINI_API_KEY';
+    const GEMINI_MODEL_STORAGE_KEY = 'QAGENTIC_GEMINI_MODEL';
+    const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
     let currentIntentMode = 'playwright-scripts';
     let isLocalServerAvailable = false;
     let scrapedElements = [];
@@ -770,13 +778,26 @@ Quantity input (min 1, max 10)</textarea>
       }
     }
 
+    function getSavedGeminiModel() {
+      try {
+        const stored = (localStorage.getItem(GEMINI_MODEL_STORAGE_KEY) || '').trim();
+        if (!stored || stored === 'gemini-2.5-flash') return DEFAULT_GEMINI_MODEL;
+        return stored;
+      } catch {
+        return DEFAULT_GEMINI_MODEL;
+      }
+    }
+
     function refreshAiKeyStatusUI() {
       const key = getSavedGeminiKey();
+      const model = getSavedGeminiModel();
       const badge = document.getElementById('aiKeyStatusBadge');
       const input = document.getElementById('geminiApiKeyInput');
+      const modelSelect = document.getElementById('geminiModelSelect');
       if (input && key) input.value = key;
+      if (modelSelect && model) modelSelect.value = model;
       if (key) {
-        badge.textContent = 'AI Engine: Gemini 2.5 Flash Active';
+        badge.textContent = 'AI Engine: Gemini 3.8 Flash Active';
         badge.className = 'badge mode-local';
       } else {
         badge.textContent = 'AI Engine: Template Mode (Add AI Studio Key)';
@@ -790,12 +811,14 @@ Quantity input (min 1, max 10)</textarea>
 
     function saveGeminiApiKey() {
       const val = document.getElementById('geminiApiKeyInput').value.trim();
+      const modelVal = (document.getElementById('geminiModelSelect')?.value || DEFAULT_GEMINI_MODEL).trim();
       if (!val) {
         showToast('Please paste a valid Google AI Studio API key.');
         return;
       }
       try {
         localStorage.setItem(GEMINI_STORAGE_KEY, val);
+        localStorage.setItem(GEMINI_MODEL_STORAGE_KEY, modelVal);
       } catch {}
       refreshAiKeyStatusUI();
       document.getElementById('apiKeyDrawer').classList.remove('open');
@@ -805,6 +828,7 @@ Quantity input (min 1, max 10)</textarea>
     function clearGeminiApiKey() {
       try {
         localStorage.removeItem(GEMINI_STORAGE_KEY);
+        localStorage.removeItem(GEMINI_MODEL_STORAGE_KEY);
       } catch {}
       document.getElementById('geminiApiKeyInput').value = '';
       refreshAiKeyStatusUI();
@@ -815,7 +839,8 @@ Quantity input (min 1, max 10)</textarea>
       const apiKey = getSavedGeminiKey();
       if (!apiKey) return null;
 
-      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+      const selectedModel = (document.getElementById('geminiModelSelect')?.value || getSavedGeminiModel() || DEFAULT_GEMINI_MODEL).trim();
+      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(selectedModel) + ':generateContent?key=' + encodeURIComponent(apiKey);
       const generationConfig = {
         temperature: 0.15
       };
@@ -834,7 +859,7 @@ Quantity input (min 1, max 10)</textarea>
 
       if (!response.ok) {
         const errBody = await response.text();
-        throw new Error('Gemini API error (' + response.status + '): ' + errBody.slice(0, 180));
+        throw new Error('Gemini API error (' + response.status + '): ' + errBody.slice(0, 220));
       }
 
       const data = await response.json();
