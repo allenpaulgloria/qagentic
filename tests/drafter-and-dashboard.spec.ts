@@ -341,5 +341,45 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
       'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
     );
     await expect(page.locator('#specCodeBox')).toContainText('test.describe');
+
+    // 4. Verify Google AI Studio Key localStorage persistence and browser Gemini synthesis
+    await page.route('https://generativelanguage.googleapis.com/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: JSON.stringify({
+                      cases: [
+                        {
+                          id: 'TC-AI-001',
+                          technique: 'BVA',
+                          title: 'AI Synthesized BVA: Quantity at Max Boundary (10)',
+                          preconditions: 'On PDP',
+                          steps: '1. Set quantity to 10\n2. Click Add to Cart',
+                          expected: 'Cart badge updates to 10',
+                        },
+                      ],
+                    }),
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      });
+    });
+
+    await page.getByRole('button', { name: 'Google AI Studio Key' }).click();
+    await page.locator('#geminiApiKeyInput').fill('AIzaSyTestLocalStorageKey123');
+    await page.getByRole('button', { name: 'Save Key to Browser' }).click();
+    await expect(page.locator('#aiKeyStatusBadge')).toHaveText('AI Engine: Gemini 2.5 Flash Active');
+
+    await page.locator('#option-test-cases').click();
+    await expect(page.locator('#tcMarkdownBox')).toContainText('TC-AI-001');
   });
 });

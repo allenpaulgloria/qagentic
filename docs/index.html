@@ -32,11 +32,14 @@
       justify-content: space-between;
       align-items: center;
       background: rgba(11, 17, 32, 0.94);
+      flex-wrap: wrap;
+      gap: 12px;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
     .brand h1 {
       margin: 0;
@@ -62,10 +65,22 @@
       color: #c084fc;
       border-color: rgba(168, 85, 247, 0.4);
     }
+    .api-drawer {
+      max-width: 980px;
+      margin: 14px auto 0 auto;
+      padding: 14px 20px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: none;
+    }
+    .api-drawer.open {
+      display: block;
+    }
     .container {
       max-width: 980px;
       margin: 0 auto;
-      padding: 36px 20px 72px 20px;
+      padding: 32px 20px 72px 20px;
     }
 
     /* Intent-First Launcher */
@@ -206,7 +221,7 @@
       font-size: 0.76rem;
       margin-left: 6px;
     }
-    input[type="text"], select, textarea {
+    input[type="text"], input[type="password"], select, textarea {
       width: 100%;
       padding: 9px 11px;
       background: var(--panel-alt);
@@ -385,9 +400,37 @@
     <div class="brand">
       <h1>qagentic</h1>
       <span id="runtimeModeBadge" class="badge mode-gh">Standalone Browser Mode</span>
+      <span id="aiKeyStatusBadge" class="badge" style="cursor:pointer;" onclick="toggleApiKeyDrawer()">AI Engine: Template Mode (Add AI Studio Key)</span>
     </div>
-    <button type="button" class="secondary" style="padding:5px 12px;font-size:0.78rem;" onclick="loadSamplePdpBrief()">Load Example</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button type="button" class="secondary" style="padding:5px 12px;font-size:0.78rem;" onclick="toggleApiKeyDrawer()">Google AI Studio Key</button>
+      <button type="button" class="secondary" style="padding:5px 12px;font-size:0.78rem;" onclick="loadSamplePdpBrief()">Load Example</button>
+    </div>
   </header>
+
+  <!-- Collapsible Google AI Studio API Key Drawer (Stored in localStorage only) -->
+  <div style="padding: 0 20px;">
+    <section id="apiKeyDrawer" class="api-drawer" aria-label="Google AI Studio API Key Settings">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
+        <div>
+          <strong style="font-size:0.9rem; color:var(--accent);">Google AI Studio API Key (Gemini 2.5 Flash)</strong>
+          <div style="font-size:0.78rem; color:var(--muted);">
+            Stored strictly in this browser's <code>localStorage</code> — never committed to Git or visible to other visitors. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">aistudio.google.com/apikey</a>.
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input
+          type="password"
+          id="geminiApiKeyInput"
+          placeholder="Paste your Google AI Studio API Key (AIza...)"
+          style="flex:1; min-width:240px;"
+        />
+        <button type="button" class="success" onclick="saveGeminiApiKey()">Save Key to Browser</button>
+        <button type="button" class="secondary" onclick="clearGeminiApiKey()">Clear Key</button>
+      </div>
+    </section>
+  </div>
 
   <main class="container">
     <!-- INTENT LAUNCHER: "What would you like to do?" + 3 Options + URL Input -->
@@ -405,7 +448,7 @@
           onclick="selectIntentMode('test-cases')"
         >
           <strong>Write test cases</strong>
-          <span>Generate structured ISTQB functional test cases (EP, BVA, Decision Table, State Transition) to copy or download as Markdown/CSV.</span>
+          <span>Generate thorough ISTQB functional test cases (EP, BVA, Decision Table, State Transition, Error Guessing) in Markdown &amp; CSV.</span>
         </div>
 
         <div
@@ -459,7 +502,7 @@
               <h3 class="card-title">Write Test Cases (ISTQB Test Design)</h3>
               <p class="card-desc">Describe the flow and expected outcomes to generate a structured test suite in Markdown and CSV.</p>
             </div>
-            <button type="button" onclick="generateTestCasesArtifact()">Generate Test Cases</button>
+            <button type="button" id="generateTcBtn" onclick="generateTestCasesArtifact()">Generate Test Cases</button>
           </div>
 
           <label for="tcFlowInput">Feature / User Flow</label>
@@ -503,7 +546,7 @@ Quantity input (min 1, max 10)</textarea>
               <p class="card-desc">Provide your flow details and expected results to generate a compliant Page Object and Playwright spec.</p>
             </div>
             <div class="btn-row" style="margin:0;">
-              <button type="button" onclick="runDraft(false, false)">Preview Draft</button>
+              <button type="button" id="previewDraftBtn" onclick="runDraft(false, false)">Preview Draft</button>
               <button type="button" id="writeRepoBtn" class="secondary" style="display:none;" onclick="runDraft(true, false)">Write Files to Local Repo</button>
             </div>
           </div>
@@ -646,7 +689,7 @@ Quantity input (min 1, max 10)</textarea>
               <h3 class="card-title">Run Exploratory Tests (Session Charter &amp; Heuristics)</h3>
               <p class="card-desc">Define your mission and timebox to generate an interactive Exploratory Testing Charter and edge-case checklist.</p>
             </div>
-            <button type="button" onclick="generateExploratoryArtifact()">Generate Exploratory Charter</button>
+            <button type="button" id="generateExpBtn" onclick="generateExploratoryArtifact()">Generate Exploratory Charter</button>
           </div>
 
           <label for="expMissionInput">Exploratory Mission / Charter</label>
@@ -690,6 +733,7 @@ Quantity input (min 1, max 10)</textarea>
   </main>
 
   <script>
+    const GEMINI_STORAGE_KEY = 'QAGENTIC_GEMINI_API_KEY';
     let currentIntentMode = 'playwright-scripts';
     let isLocalServerAvailable = false;
     let scrapedElements = [];
@@ -714,6 +758,90 @@ Quantity input (min 1, max 10)</textarea>
         code: "import { Page, Locator } from '@playwright/test';\n\nexport class BaseStorefrontPage {\n  readonly page: Page;\n  readonly mobileMenuButton: Locator;\n  readonly appBannerCloseButton: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.mobileMenuButton = page.getByRole('button', { name: /menu|navigation/i });\n    this.appBannerCloseButton = page.getByRole('button', { name: /close app banner|dismiss/i });\n  }\n\n  isMobileViewport(): boolean {\n    const size = this.page.viewportSize();\n    return Boolean(size && size.width < 768);\n  }\n\n  async dismissAppBannerIfPresent(): Promise<void> {\n    if (this.isMobileViewport() && (await this.appBannerCloseButton.isVisible())) {\n      await this.appBannerCloseButton.click();\n    }\n  }\n}"
       }
     ];
+
+    // =========================================================================
+    // Google AI Studio Key (localStorage) Management & Direct Browser Client
+    // =========================================================================
+    function getSavedGeminiKey() {
+      try {
+        return (localStorage.getItem(GEMINI_STORAGE_KEY) || '').trim();
+      } catch {
+        return '';
+      }
+    }
+
+    function refreshAiKeyStatusUI() {
+      const key = getSavedGeminiKey();
+      const badge = document.getElementById('aiKeyStatusBadge');
+      const input = document.getElementById('geminiApiKeyInput');
+      if (input && key) input.value = key;
+      if (key) {
+        badge.textContent = 'AI Engine: Gemini 2.5 Flash Active';
+        badge.className = 'badge mode-local';
+      } else {
+        badge.textContent = 'AI Engine: Template Mode (Add AI Studio Key)';
+        badge.className = 'badge';
+      }
+    }
+
+    function toggleApiKeyDrawer() {
+      document.getElementById('apiKeyDrawer').classList.toggle('open');
+    }
+
+    function saveGeminiApiKey() {
+      const val = document.getElementById('geminiApiKeyInput').value.trim();
+      if (!val) {
+        showToast('Please paste a valid Google AI Studio API key.');
+        return;
+      }
+      try {
+        localStorage.setItem(GEMINI_STORAGE_KEY, val);
+      } catch {}
+      refreshAiKeyStatusUI();
+      document.getElementById('apiKeyDrawer').classList.remove('open');
+      showToast('Google AI Studio Key saved to browser localStorage!');
+    }
+
+    function clearGeminiApiKey() {
+      try {
+        localStorage.removeItem(GEMINI_STORAGE_KEY);
+      } catch {}
+      document.getElementById('geminiApiKeyInput').value = '';
+      refreshAiKeyStatusUI();
+      showToast('API Key removed from browser localStorage.');
+    }
+
+    async function callGeminiFromBrowser(promptText, expectJson) {
+      const apiKey = getSavedGeminiKey();
+      if (!apiKey) return null;
+
+      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey);
+      const generationConfig = {
+        temperature: 0.15
+      };
+      if (expectJson) {
+        generationConfig.responseMimeType = 'application/json';
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig
+        })
+      });
+
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error('Gemini API error (' + response.status + '): ' + errBody.slice(0, 180));
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!text) return null;
+      return expectJson ? JSON.parse(text) : text;
+    }
 
     function showToast(msg) {
       const t = document.getElementById('copyToast');
@@ -757,9 +885,9 @@ Quantity input (min 1, max 10)</textarea>
     }
 
     // =========================================================================
-    // MODE 1: Write test cases generator
+    // MODE 1: Write test cases generator (Gemini 2.5 Flash + Deterministic Fallback)
     // =========================================================================
-    function generateTestCasesArtifact() {
+    async function generateTestCasesArtifact() {
       const url = document.getElementById('urlInput').value.trim();
       const flow = document.getElementById('tcFlowInput').value.trim() || 'Core user flow';
       const inputsRaw = document.getElementById('tcInputsInput').value
@@ -771,7 +899,7 @@ Quantity input (min 1, max 10)</textarea>
         .map(l => l.replace(/^\d+\.\s*/, '').trim())
         .filter(Boolean);
 
-      const cases = [
+      let cases = [
         {
           id: 'TC-001',
           technique: 'State Transition',
@@ -806,6 +934,28 @@ Quantity input (min 1, max 10)</textarea>
         }
       ];
 
+      if (getSavedGeminiKey()) {
+        try {
+          document.getElementById('generateTcBtn').textContent = 'Synthesizing with Gemini...';
+          const aiPrompt = [
+            'You are a Senior ISTQB Test Architect. Generate a thorough set of 6 to 10 functional test cases in JSON format: { "cases": [ { "id": "TC-001", "technique": "EP | BVA | Decision Table | State Transition | Error Guessing", "title": "...", "preconditions": "...", "steps": "1. ...\\n2. ...", "expected": "..." } ] }.',
+            'Target URL: ' + url,
+            'Flow: ' + flow,
+            'Inputs & Boundaries: ' + inputsRaw.join('; '),
+            'Expected Results: ' + expectedLines.join('; ')
+          ].join('\n');
+          const aiResult = await callGeminiFromBrowser(aiPrompt, true);
+          if (aiResult && Array.isArray(aiResult.cases) && aiResult.cases.length > 0) {
+            cases = aiResult.cases;
+          }
+        } catch (err) {
+          document.getElementById('alertBox').innerHTML =
+            '<div class="alert stop">Gemini API notice: ' + escapeHtml(err.message) + ' (Showing deterministic test cases below).</div>';
+        } finally {
+          document.getElementById('generateTcBtn').textContent = 'Generate Test Cases';
+        }
+      }
+
       lastGeneratedTestCases = cases;
 
       const rowsHtml = cases.map(c =>
@@ -822,7 +972,7 @@ Quantity input (min 1, max 10)</textarea>
         '',
         '| ID | ISTQB Technique | Title | Steps | Expected Result |',
         '| :--- | :--- | :--- | :--- | :--- |',
-        ...cases.map(c => '| ' + c.id + ' | ' + c.technique + ' | ' + c.title + ' | ' + c.steps.replace(/\n/g, '<br/>') + ' | ' + c.expected + ' |')
+        ...cases.map(c => '| ' + c.id + ' | ' + c.technique + ' | ' + c.title + ' | ' + String(c.steps || '').replace(/\n/g, '<br/>') + ' | ' + c.expected + ' |')
       ];
       document.getElementById('tcMarkdownBox').textContent = mdLines.join('\n');
     }
@@ -832,7 +982,7 @@ Quantity input (min 1, max 10)</textarea>
       const csvRows = [
         ['ID', 'ISTQB Technique', 'Title', 'Preconditions', 'Steps', 'Expected Result'].join(','),
         ...lastGeneratedTestCases.map(c =>
-          [c.id, c.technique, c.title, c.preconditions, c.steps.replace(/\n/g, ' '), c.expected]
+          [c.id, c.technique, c.title, c.preconditions, String(c.steps || '').replace(/\n/g, ' '), c.expected]
             .map(v => '"' + String(v || '').replace(/"/g, '""') + '"')
             .join(',')
         )
@@ -841,15 +991,15 @@ Quantity input (min 1, max 10)</textarea>
     }
 
     // =========================================================================
-    // MODE 3: Run exploratory tests generator
+    // MODE 3: Run exploratory tests generator (Gemini 2.5 Flash + Fallback)
     // =========================================================================
-    function generateExploratoryArtifact() {
+    async function generateExploratoryArtifact() {
       const url = document.getElementById('urlInput').value.trim();
       const mission = document.getElementById('expMissionInput').value.trim();
       const timebox = document.getElementById('expTimeboxInput').value;
       const persona = document.getElementById('expPersonaInput').value;
 
-      const md = [
+      let md = [
         '# Exploratory Testing Session Sheet',
         '',
         '- **Target URL**: ' + url,
@@ -873,6 +1023,27 @@ Quantity input (min 1, max 10)</textarea>
         '- [ ] Candidate 1: ',
         '- [ ] Candidate 2: '
       ].join('\n');
+
+      if (getSavedGeminiKey()) {
+        try {
+          document.getElementById('generateExpBtn').textContent = 'Generating with Gemini...';
+          const aiPrompt = [
+            'You are a Principal Exploratory QA Engineer. Create a thorough, actionable Markdown Exploratory Testing Session Sheet for:',
+            '- Target URL: ' + url,
+            '- Mission / Charter: ' + mission,
+            '- Timebox: ' + timebox,
+            '- Viewport / Persona: ' + persona,
+            'Include: 1) Tailored Feature & Heuristic Tours with checkboxes, 2) Specific Edge-Case & State Transition Probes for this flow, 3) Accessibility & Responsive Checks, 4) Session Bug/Observation Log Markdown table, and 5) Candidate Automation Scenarios.'
+          ].join('\n');
+          const aiMd = await callGeminiFromBrowser(aiPrompt, false);
+          if (aiMd) md = aiMd;
+        } catch (err) {
+          document.getElementById('alertBox').innerHTML =
+            '<div class="alert stop">Gemini API notice: ' + escapeHtml(err.message) + '</div>';
+        } finally {
+          document.getElementById('generateExpBtn').textContent = 'Generate Exploratory Charter';
+        }
+      }
 
       document.getElementById('expMarkdownBox').textContent = md;
     }
@@ -1282,6 +1453,42 @@ Quantity input (min 1, max 10)</textarea>
         data = await res.json();
       } else {
         data = draftClientSide(inputs);
+        if (!data.stopped && getSavedGeminiKey()) {
+          try {
+            document.getElementById('previewDraftBtn').textContent = 'Drafting with Gemini...';
+            const pickedLocators = scrapedElements
+              .filter(el => selectedElementIndices.includes(el.index))
+              .map(el => el.recommendedLocator);
+            const aiPrompt = [
+              'You are a Playwright Test Drafter. Generate a thorough Page Object Model and Playwright Spec in JSON format:',
+              '{ "pageObjectCode": "...", "specCode": "...", "testTable": [{ "name": "BVA: ...", "technique": "EP | BVA | Decision Table | State Transition | Error Guessing", "expectedResultNumbers": [1, 2], "platform": "both" }], "candidateAssertions": [{ "id": "CAND-1", "description": "...", "suggestedAssertionCode": "await expect(...).toBeVisible();" }] }',
+              'Strict Rules:',
+              '1. Import { test, expect, skipIfMobile } from "../utils/fixtures.js", TEST_DATA from "../utils/test-data.js", and getSku from "../utils/sku.js".',
+              '2. Locator order: getByRole with accessible name -> getByLabel -> getByPlaceholder -> getByText -> [data-qa="..."] fallback. Use .filter() and chaining, no CSS classes.',
+              '3. Web-first assertions only (toBeVisible, toHaveText, toHaveURL, toHaveCount). Zero waitForTimeout, networkidle, page.$, or waitForSelector.',
+              '4. Desktop-only cases use skipIfMobile(testInfo). Mobile differences go in the Page Object.',
+              '5. Write one test per ISTQB case (EP, BVA, Decision Table, State Transition, Error Guessing). Cover every numbered expected result.',
+              'Inputs: ' + JSON.stringify(inputs),
+              'Selected Locators: ' + JSON.stringify(pickedLocators)
+            ].join('\n');
+            const aiDraft = await callGeminiFromBrowser(aiPrompt, true);
+            if (aiDraft && aiDraft.specCode && aiDraft.pageObjectCode) {
+              data.draftResult.specCode = aiDraft.specCode;
+              data.draftResult.pageObjectCode = aiDraft.pageObjectCode;
+              if (Array.isArray(aiDraft.testTable) && aiDraft.testTable.length > 0) {
+                data.draftResult.testTable = aiDraft.testTable;
+              }
+              if (Array.isArray(aiDraft.candidateAssertions)) {
+                data.draftResult.candidateAssertions = aiDraft.candidateAssertions;
+              }
+            }
+          } catch (err) {
+            document.getElementById('alertBox').innerHTML =
+              '<div class="alert stop">Gemini API notice: ' + escapeHtml(err.message) + '</div>';
+          } finally {
+            document.getElementById('previewDraftBtn').textContent = 'Preview Draft';
+          }
+        }
       }
 
       if (data.stopped) {
@@ -1305,7 +1512,7 @@ Quantity input (min 1, max 10)</textarea>
       document.getElementById('summaryBox').textContent = data.summary.outputSummaryMarkdown + '\n---\n' + data.summary.mrDescriptionMarkdown;
 
       const rowsHtml = data.draftResult.testTable.map(r =>
-        '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.technique) + '</td><td>' + r.expectedResultNumbers.join(', ') + '</td><td>' + escapeHtml(r.platform) + '</td></tr>'
+        '<tr><td>' + escapeHtml(r.name) + '</td><td>' + escapeHtml(r.technique) + '</td><td>' + (r.expectedResultNumbers || [1]).join(', ') + '</td><td>' + escapeHtml(r.platform) + '</td></tr>'
       ).join('');
       document.getElementById('testTableContainer').innerHTML =
         '<table><thead><tr><th>Test Name</th><th>ISTQB Technique</th><th>Expected Result #</th><th>Platform</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
@@ -1368,6 +1575,7 @@ Quantity input (min 1, max 10)</textarea>
         .replace(/"/g, '&quot;');
     }
 
+    refreshAiKeyStatusUI();
     renderScaffoldTemplates();
     inspectRepo();
   </script>
