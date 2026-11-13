@@ -279,15 +279,15 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
 
     try {
       await page.goto('http://dashboard.local/');
-      await expect(page.getByRole('heading', { name: /qagentic/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
+      await expect(page.locator('#progressiveWorkspace')).toBeHidden();
 
-      await page.getByRole('button', { name: 'Load Example Brief' }).click();
-      await page.getByRole('button', { name: 'Preview Draft' }).click();
+      await page.getByRole('button', { name: 'Load Example' }).click();
+      await expect(page.locator('#progressiveWorkspace')).toBeVisible();
 
       await expect(page.locator('#branchBadge')).toHaveText(
         'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
       );
-      await expect(page.locator('#agentPromptBox')).toContainText('You are a Playwright test DRAFTER');
       await expect(page.locator('#specCodeBox')).toContainText('test.describe');
 
       // Clear ENV to trigger Stop-and-Ask alert in Dashboard
@@ -300,7 +300,7 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
     }
   });
 
-  test('Static GitHub Pages Home Page (docs/index.html) works 100% standalone in browser without a backend server', async ({
+  test('Static GitHub Pages Home Page (docs/index.html) supports all 3 progressive modes (Write test cases, Write Playwright scripts, Run exploratory tests)', async ({
     page,
   }) => {
     const staticHtmlPath = path.resolve(process.cwd(), 'docs', 'index.html');
@@ -320,31 +320,26 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
     });
 
     await page.goto('http://github-pages.local/');
-    await expect(page.locator('#runtimeModeBadge')).toContainText('Standalone Browser Mode');
+    await expect(page.getByRole('heading', { name: 'What would you like to do?' })).toBeVisible();
+    await expect(page.locator('#progressiveWorkspace')).toBeHidden();
 
-    // Verify local-only server controls are hidden in Standalone GitHub Pages Mode
-    await expect(page.locator('#localServerControls')).toBeHidden();
+    // 1. Mode: Write test cases
+    await page.locator('#option-test-cases').click();
+    await expect(page.locator('#progressiveWorkspace')).toBeVisible();
+    await expect(page.locator('#mode-test-cases')).toBeVisible();
+    await expect(page.locator('#tcMarkdownBox')).toContainText('# Functional Test Cases');
 
-    // Test in-browser HTML Snippet Subset Extractor on GitHub Pages
-    await page.getByRole('button', { name: 'Extract Locators from HTML Snippet' }).click();
-    await expect(page.locator('#scrapeMeta')).toContainText('in-browser DOM subset parser');
-    await expect(page.locator('#elementsContainer')).toContainText('getByRole("button", { name: "Add to Cart" })');
+    // 2. Mode: Run exploratory tests
+    await page.locator('#option-exploratory').click();
+    await expect(page.locator('#mode-exploratory')).toBeVisible();
+    await expect(page.locator('#expMarkdownBox')).toContainText('# Exploratory Testing Session Sheet');
 
-    // Verify Complete Agent Prompt includes the extracted locators
-    await expect(page.locator('#agentPromptBox')).toContainText('## Extracted Semantic Locators (Selected Subset)');
-
-    // Test in-browser example brief parsing and standalone ISTQB drafting
-    await page.getByRole('button', { name: 'Load Example Brief' }).click();
-    await page.getByRole('button', { name: 'Preview Draft' }).click();
+    // 3. Mode: Write Playwright scripts
+    await page.locator('#option-playwright-scripts').click();
+    await expect(page.locator('#mode-playwright-scripts')).toBeVisible();
     await expect(page.locator('#branchBadge')).toHaveText(
       'PROJ-101_Playwright_Migration_PDP_Add_To_Cart_2_options_dropdown_and_thumbnail'
     );
-
-    // Navigate across Home Page tabs
-    await page.getByRole('button', { name: 'Project Scaffolder Files' }).click();
-    await expect(page.locator('#scaffoldTemplatesContainer')).toContainText('utils/fixtures.ts');
-
-    await page.getByRole('button', { name: 'Agent Skill & Prompt' }).click();
-    await expect(page.locator('#blankBriefTemplate')).toContainText('## Inputs (I fill these in)');
+    await expect(page.locator('#specCodeBox')).toContainText('test.describe');
   });
 });
