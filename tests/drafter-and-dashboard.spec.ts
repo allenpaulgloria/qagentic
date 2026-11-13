@@ -381,5 +381,27 @@ test.describe('Playwright Test Drafter, Scaffolder & Dashboard Suite', () => {
 
     await page.locator('#option-test-cases').click();
     await expect(page.locator('#tcMarkdownBox')).toContainText('TC-AI-001');
+
+    // 5. Verify Jira Wiki Markup and JSON format switchers
+    await page.getByRole('button', { name: 'Jira Wiki Markup' }).click();
+    await expect(page.locator('#tcMarkdownBox')).toContainText('||ID||ISTQB Technique||Title||');
+
+    await page.getByRole('button', { name: 'JSON (.json)' }).click();
+    await expect(page.locator('#tcMarkdownBox')).toContainText('"totalCases": 1');
+
+    // 6. Verify humorous high-usage error message on 429 rate-limit response
+    await page.unroute('https://generativelanguage.googleapis.com/**');
+    await page.route('https://generativelanguage.googleapis.com/**', async (route) => {
+      await route.fulfill({
+        status: 429,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: { code: 429, message: 'Resource has been exhausted (e.g. check quota).' } }),
+      });
+    });
+
+    await page.getByRole('button', { name: 'Generate Test Cases' }).click();
+    await expect(page.locator('#alertBox')).toContainText(
+      'The free tier is in high usage. Send me some money so I can afford AI credits!'
+    );
   });
 });

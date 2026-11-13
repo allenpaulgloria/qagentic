@@ -413,9 +413,9 @@
     <section id="apiKeyDrawer" class="api-drawer" aria-label="Google AI Studio API Key Settings">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
         <div>
-          <strong style="font-size:0.9rem; color:var(--accent);">Google AI Studio API Key (Gemini 3.8 Flash — Free Tier)</strong>
+          <strong style="font-size:0.9rem; color:var(--accent);">Bring Your Own API Key (Google AI Studio — Gemini 3.8 Flash)</strong>
           <div style="font-size:0.78rem; color:var(--muted);">
-            Stored strictly in this browser's <code>localStorage</code> — never committed to Git or visible to other visitors. Get a free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">aistudio.google.com/apikey</a>.
+            <strong>Coworker &amp; Demo Friendly:</strong> Your key is saved strictly in <em>your own browser's</em> <code>localStorage</code> — never sent to GitHub or shared with other visitors. Grab a free key in 10 seconds at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">aistudio.google.com/apikey</a>.
           </div>
         </div>
       </div>
@@ -423,9 +423,10 @@
         <input
           type="password"
           id="geminiApiKeyInput"
-          placeholder="Paste your Google AI Studio API Key (AIza...)"
+          placeholder="Paste your own Google AI Studio API Key (AIza...)"
           style="flex:1; min-width:240px;"
         />
+        <button type="button" class="secondary" onclick="toggleApiKeyVisibility()" id="toggleKeyVisBtn">Show</button>
         <select id="geminiModelSelect" aria-label="Gemini Model" style="width:auto; min-width:190px;">
           <option value="gemini-3.8-flash" selected>gemini-3.8-flash (Default)</option>
           <option value="gemini-3.8-flash-lite">gemini-3.8-flash-lite</option>
@@ -492,6 +493,11 @@
         />
         <button type="button" id="startWorkflowBtn" onclick="startSelectedWorkflow()">Continue</button>
       </div>
+
+      <div style="margin-top:12px; padding-top:10px; border-top:1px dashed var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:0.79rem; color:var(--muted);">
+        <span><strong>Trying this out with coworkers?</strong> Everyone can plug in their own free Google AI Studio key locally in their browser.</span>
+        <button type="button" class="secondary" style="padding:4px 10px; font-size:0.76rem;" onclick="toggleApiKeyDrawer()">Bring Your Own API Key</button>
+      </div>
     </section>
 
     <!-- PROGRESSIVE WORKSPACE: Expands smoothly with only the chosen mode -->
@@ -527,16 +533,28 @@ Quantity input (min 1, max 10)</textarea>
           <div class="card-header">
             <div>
               <h3 class="card-title">Generated Test Cases</h3>
-              <p class="card-desc">Copy as Markdown for Jira/Confluence/GitHub or download as a CSV spreadsheet.</p>
+              <p class="card-desc">Export for Jira, Google Sheets, Confluence/GitHub Markdown, CSV, or JSON.</p>
             </div>
             <div class="btn-row" style="margin:0;">
-              <button type="button" class="success" onclick="copyText('tcMarkdownBox')">Copy Test Cases (.md)</button>
+              <button type="button" class="success" onclick="copyText('tcMarkdownBox')">Copy Markdown (.md)</button>
+              <button type="button" class="secondary" onclick="copyTestCasesJira()">Copy Jira Format</button>
+              <button type="button" class="secondary" onclick="copyTestCasesForGoogleSheets()">Copy for Google Sheets</button>
+              <button type="button" class="secondary" onclick="window.open('https://sheets.new', '_blank', 'noopener')">Open sheets.new</button>
+              <button type="button" class="secondary" onclick="copyTestCasesJson()">Copy JSON</button>
+              <button type="button" class="secondary" onclick="downloadTestCasesJson()">Download .json</button>
               <button type="button" class="secondary" onclick="downloadTextFile('test-cases.md', document.getElementById('tcMarkdownBox').textContent)">Download .md</button>
               <button type="button" class="secondary" onclick="downloadTestCasesCsv()">Download .csv</button>
             </div>
           </div>
           <div id="tcRenderedTable"></div>
-          <label>Markdown Artifact</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px;">
+            <label style="margin:0;">Artifact Preview</label>
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="secondary" style="padding:3px 9px; font-size:0.75rem;" onclick="switchTcPreviewFormat('md')">Markdown (.md)</button>
+              <button type="button" class="secondary" style="padding:3px 9px; font-size:0.75rem;" onclick="switchTcPreviewFormat('jira')">Jira Wiki Markup</button>
+              <button type="button" class="secondary" style="padding:3px 9px; font-size:0.75rem;" onclick="switchTcPreviewFormat('json')">JSON (.json)</button>
+            </div>
+          </div>
           <pre id="tcMarkdownBox"></pre>
         </div>
       </section>
@@ -663,6 +681,8 @@ Quantity input (min 1, max 10)</textarea>
               <button type="button" class="success" onclick="copyText('specCodeBox')">Copy Spec (<code id="specPathLabel">tests/...</code>)</button>
               <button type="button" class="secondary" onclick="copyText('poCodeBox')">Copy Page Object (<code id="poPathLabel">page-objects/...</code>)</button>
               <button type="button" class="secondary" onclick="downloadDraftFiles()">Download .spec.ts &amp; .page.ts</button>
+              <button type="button" class="secondary" onclick="copyDraftJson()">Copy JSON</button>
+              <button type="button" class="secondary" onclick="downloadDraftJson()">Download .json</button>
             </div>
           </div>
 
@@ -730,6 +750,8 @@ Quantity input (min 1, max 10)</textarea>
             <div class="btn-row" style="margin:0;">
               <button type="button" class="success" onclick="copyText('expMarkdownBox')">Copy Exploratory Sheet (.md)</button>
               <button type="button" class="secondary" onclick="downloadTextFile('exploratory-session.md', document.getElementById('expMarkdownBox').textContent)">Download .md</button>
+              <button type="button" class="secondary" onclick="copyExploratoryJson()">Copy JSON</button>
+              <button type="button" class="secondary" onclick="downloadExploratoryJson()">Download .json</button>
             </div>
           </div>
           <pre id="expMarkdownBox"></pre>
@@ -748,6 +770,9 @@ Quantity input (min 1, max 10)</textarea>
     let selectedElementIndices = [];
     let confirmedCandidateCodes = new Set();
     let lastGeneratedTestCases = [];
+    let currentTcPreviewFormat = 'md';
+    let lastDraftPayload = null;
+    let lastExploratoryPayload = null;
 
     const SCAFFOLD_TEMPLATES = [
       {
@@ -807,6 +832,33 @@ Quantity input (min 1, max 10)</textarea>
 
     function toggleApiKeyDrawer() {
       document.getElementById('apiKeyDrawer').classList.toggle('open');
+    }
+
+    function toggleApiKeyVisibility() {
+      const inp = document.getElementById('geminiApiKeyInput');
+      const btn = document.getElementById('toggleKeyVisBtn');
+      if (!inp) return;
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        if (btn) btn.textContent = 'Hide';
+      } else {
+        inp.type = 'password';
+        if (btn) btn.textContent = 'Show';
+      }
+    }
+
+    function formatFunnyGeminiError(rawMessage) {
+      const msg = String(rawMessage || '');
+      if (/429|503|quota|rate|exhausted|overloaded|high usage/i.test(msg)) {
+        return '💸 The free tier is in high usage. Send me some money so I can afford AI credits! (Or click "Bring Your Own API Key" above to plug in your own key — showing our rock-solid deterministic test cases below so the demo must go on!)';
+      }
+      if (/400|401|403|api_key_invalid|unauthorized|permission/i.test(msg)) {
+        return '🕵️‍♂️ 401 Plot Twist: That API key failed its own assertion! Double-check for sneaky typos or spaces in "Bring Your Own API Key" above. (Showing deterministic fallback below.)';
+      }
+      if (/404|not found|no longer available/i.test(msg)) {
+        return '🦕 404 Model Extinct: That Gemini model went the way of Internet Explorer 6! Open "Bring Your Own API Key" above and switch to gemini-3.8-flash. (' + msg + ')';
+      }
+      return '🤖 The free tier is in high usage (or the AI tripped over a stray semicolon). Send me some money so I can afford AI credits — or plug in your own API key above! Details: ' + msg;
     }
 
     function saveGeminiApiKey() {
@@ -896,7 +948,7 @@ Quantity input (min 1, max 10)</textarea>
       if (activePanel) activePanel.classList.add('active');
 
       if (!urlVal) {
-        alertBox.innerHTML = '<div class="alert stop">Please enter a Target URL above to continue.</div>';
+        alertBox.innerHTML = '<div class="alert stop">🧭 Even the best automated test can\'t <code>page.goto("")</code> into the void! Drop a Target URL in the box above first.</div>';
         return;
       }
 
@@ -975,7 +1027,7 @@ Quantity input (min 1, max 10)</textarea>
           }
         } catch (err) {
           document.getElementById('alertBox').innerHTML =
-            '<div class="alert stop">Gemini API notice: ' + escapeHtml(err.message) + ' (Showing deterministic test cases below).</div>';
+            '<div class="alert stop">' + escapeHtml(formatFunnyGeminiError(err.message)) + '</div>';
         } finally {
           document.getElementById('generateTcBtn').textContent = 'Generate Test Cases';
         }
@@ -989,7 +1041,11 @@ Quantity input (min 1, max 10)</textarea>
       document.getElementById('tcRenderedTable').innerHTML =
         '<table><thead><tr><th>ID</th><th>ISTQB Technique</th><th>Test Case Title</th><th>Expected Result</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
 
-      const mdLines = [
+      switchTcPreviewFormat('md');
+    }
+
+    function buildTestCasesMarkdown(cases, url, flow) {
+      return [
         '# Functional Test Cases — ' + flow,
         '',
         '- **Target URL**: ' + url,
@@ -998,8 +1054,85 @@ Quantity input (min 1, max 10)</textarea>
         '| ID | ISTQB Technique | Title | Steps | Expected Result |',
         '| :--- | :--- | :--- | :--- | :--- |',
         ...cases.map(c => '| ' + c.id + ' | ' + c.technique + ' | ' + c.title + ' | ' + String(c.steps || '').replace(/\n/g, '<br/>') + ' | ' + c.expected + ' |')
+      ].join('\n');
+    }
+
+    function buildTestCasesJiraMarkup(cases, url, flow) {
+      return [
+        'h2. Functional Test Cases — ' + flow,
+        '* *Target URL:* ' + url,
+        '* *Total Cases:* ' + cases.length,
+        '',
+        '||ID||ISTQB Technique||Title||Preconditions||Steps||Expected Result||',
+        ...cases.map(c =>
+          '|*' + c.id + '*|' + c.technique + '|' + c.title + '|' + (c.preconditions || ('Navigate to ' + url)) + '|' + String(c.steps || '').replace(/\n/g, ' \\\\ ') + '|' + c.expected + '|'
+        )
+      ].join('\n');
+    }
+
+    function buildTestCasesJsonString(cases, url, flow) {
+      return JSON.stringify(
+        {
+          targetUrl: url,
+          flow,
+          generatedAt: new Date().toISOString(),
+          totalCases: cases.length,
+          cases
+        },
+        null,
+        2
+      );
+    }
+
+    function switchTcPreviewFormat(fmt) {
+      const url = document.getElementById('urlInput').value.trim();
+      const flow = document.getElementById('tcFlowInput').value.trim() || 'Core user flow';
+      const cases = lastGeneratedTestCases || [];
+      const box = document.getElementById('tcMarkdownBox');
+      if (fmt === 'jira') {
+        box.textContent = buildTestCasesJiraMarkup(cases, url, flow);
+      } else if (fmt === 'json') {
+        box.textContent = buildTestCasesJsonString(cases, url, flow);
+      } else {
+        box.textContent = buildTestCasesMarkdown(cases, url, flow);
+      }
+    }
+
+    function copyTestCasesJira() {
+      const url = document.getElementById('urlInput').value.trim();
+      const flow = document.getElementById('tcFlowInput').value.trim() || 'Core user flow';
+      const jiraText = buildTestCasesJiraMarkup(lastGeneratedTestCases, url, flow);
+      switchTcPreviewFormat('jira');
+      navigator.clipboard.writeText(jiraText);
+      showToast('Copied Jira table markup to clipboard!');
+    }
+
+    function copyTestCasesForGoogleSheets() {
+      const tsvRows = [
+        ['ID', 'ISTQB Technique', 'Title', 'Preconditions', 'Steps', 'Expected Result'].join('\t'),
+        ...lastGeneratedTestCases.map(c =>
+          [c.id, c.technique, c.title, c.preconditions, String(c.steps || '').replace(/\r?\n/g, ' '), c.expected]
+            .map(v => String(v || '').replace(/\t/g, ' '))
+            .join('\t')
+        )
       ];
-      document.getElementById('tcMarkdownBox').textContent = mdLines.join('\n');
+      navigator.clipboard.writeText(tsvRows.join('\n'));
+      showToast('Copied for Google Sheets! Open a sheet and press Ctrl+V (Cmd+V).');
+    }
+
+    function copyTestCasesJson() {
+      const url = document.getElementById('urlInput').value.trim();
+      const flow = document.getElementById('tcFlowInput').value.trim() || 'Core user flow';
+      const jsonStr = buildTestCasesJsonString(lastGeneratedTestCases, url, flow);
+      switchTcPreviewFormat('json');
+      navigator.clipboard.writeText(jsonStr);
+      showToast('Copied JSON to clipboard!');
+    }
+
+    function downloadTestCasesJson() {
+      const url = document.getElementById('urlInput').value.trim();
+      const flow = document.getElementById('tcFlowInput').value.trim() || 'Core user flow';
+      downloadTextFile('test-cases.json', buildTestCasesJsonString(lastGeneratedTestCases, url, flow));
     }
 
     function downloadTestCasesCsv() {
@@ -1064,13 +1197,50 @@ Quantity input (min 1, max 10)</textarea>
           if (aiMd) md = aiMd;
         } catch (err) {
           document.getElementById('alertBox').innerHTML =
-            '<div class="alert stop">Gemini API notice: ' + escapeHtml(err.message) + '</div>';
+            '<div class="alert stop">' + escapeHtml(formatFunnyGeminiError(err.message)) + '</div>';
         } finally {
           document.getElementById('generateExpBtn').textContent = 'Generate Exploratory Charter';
         }
       }
 
+      lastExploratoryPayload = {
+        targetUrl: url,
+        mission,
+        timebox,
+        persona,
+        generatedAt: new Date().toISOString(),
+        markdown: md
+      };
+      lastExploratoryPayload = {
+        targetUrl: url,
+        mission,
+        timebox,
+        persona,
+        markdown: md
+      };
       document.getElementById('expMarkdownBox').textContent = md;
+    }
+
+    function copyExploratoryJson() {
+      if (!lastExploratoryPayload) generateExploratoryArtifact();
+      navigator.clipboard.writeText(JSON.stringify(lastExploratoryPayload, null, 2));
+      showToast('Copied Exploratory Session as JSON!');
+    }
+
+    function downloadExploratoryJson() {
+      if (!lastExploratoryPayload) generateExploratoryArtifact();
+      downloadTextFile('exploratory-session.json', JSON.stringify(lastExploratoryPayload, null, 2));
+    }
+
+    function copyExploratoryJson() {
+      if (!lastExploratoryPayload) generateExploratoryArtifact();
+      navigator.clipboard.writeText(JSON.stringify(lastExploratoryPayload, null, 2));
+      showToast('Copied Exploratory Charter as JSON!');
+    }
+
+    function downloadExploratoryJson() {
+      if (!lastExploratoryPayload) generateExploratoryArtifact();
+      downloadTextFile('exploratory-session.json', JSON.stringify(lastExploratoryPayload, null, 2));
     }
 
     // =========================================================================
@@ -1375,17 +1545,17 @@ Quantity input (min 1, max 10)</textarea>
     function draftClientSide(inputs) {
       const stopAndAsk = [];
       if (!inputs.url || !inputs.flow) {
-        stopAndAsk.push({ code: 'MISSING_FLOW_OR_URL', question: 'URL or Flow is missing.' });
+        stopAndAsk.push({ code: 'MISSING_FLOW_OR_URL', question: '🧭 Even Playwright cannot page.goto("") into the abyss! Please provide both a Target URL and a Flow.' });
       }
       if (!inputs.env || !['dev', 'staging', 'prod'].includes(inputs.env)) {
-        stopAndAsk.push({ code: 'MISSING_ENV', question: 'ENV is missing or unclear. Please specify ENV (dev | staging | prod). I will not default to prod.' });
+        stopAndAsk.push({ code: 'MISSING_ENV', question: '🛑 Friends don\'t let friends accidentally test on prod! Please select an ENV (dev | staging | prod) first so nobody gets paged during dinner.' });
       }
       if (!inputs.expectedResults || inputs.expectedResults.length === 0) {
-        stopAndAsk.push({ code: 'MISSING_EXPECTED_RESULTS', question: 'Expected results are missing or unclear.' });
+        stopAndAsk.push({ code: 'MISSING_EXPECTED_RESULTS', question: '🔮 A test without expected results is just a vibe check! Add at least 1 numbered expected result so we have something real to assert.' });
       }
       const combined = (inputs.flow + ' ' + (inputs.expectedResults || []).join(' ')).toLowerCase();
       if (inputs.env === 'prod' && /(place order|order placement|sign-up|sign up|password reset)/i.test(combined)) {
-        stopAndAsk.push({ code: 'PROD_WRITE_BLOCKED', question: 'Write action on ENV=prod requires explicit confirmation.' });
+        stopAndAsk.push({ code: 'PROD_WRITE_BLOCKED', question: '🚨 Whoa there, cowboy! You are trying to run a write/mutation flow on ENV=prod. Switch to staging/dev unless you want to explain 500 test orders to finance!' });
       }
       if (stopAndAsk.length > 0) {
         return { stopped: true, stopAndAsk };
@@ -1509,7 +1679,7 @@ Quantity input (min 1, max 10)</textarea>
             }
           } catch (err) {
             document.getElementById('alertBox').innerHTML =
-              '<div class="alert stop">Gemini API notice: ' + escapeHtml(err.message) + '</div>';
+              '<div class="alert stop">' + escapeHtml(formatFunnyGeminiError(err.message)) + '</div>';
           } finally {
             document.getElementById('previewDraftBtn').textContent = 'Preview Draft';
           }
@@ -1519,9 +1689,19 @@ Quantity input (min 1, max 10)</textarea>
       if (data.stopped) {
         const items = (data.stopAndAsk || []).map(s => '<li><strong>[' + s.code + ']</strong> ' + escapeHtml(s.question) + '</li>').join('');
         document.getElementById('alertBox').innerHTML =
-          '<div class="alert stop"><strong>STOP AND ASK — Drafting Halted:</strong><ul style="margin:6px 0 0 0;">' + items + '</ul></div>';
+          '<div class="alert stop"><strong>🛑 STOP AND ASK — Drafting Halted:</strong><ul style="margin:6px 0 0 0;">' + items + '</ul></div>';
         return;
       }
+
+      lastDraftPayload = {
+        branchName: data.summary.branchName,
+        specRelativePath: data.draftResult.specRelativePath,
+        pageObjectRelativePath: data.draftResult.pageObjectRelativePath,
+        testTable: data.draftResult.testTable,
+        candidateAssertions: data.draftResult.candidateAssertions,
+        specCode: data.draftResult.specCode,
+        pageObjectCode: data.draftResult.pageObjectCode
+      };
 
       document.getElementById('alertBox').innerHTML =
         '<div class="alert ok">' +
@@ -1529,6 +1709,16 @@ Quantity input (min 1, max 10)</textarea>
         '</div>';
 
       const branchName = data.summary.branchName;
+      lastDraftPayload = {
+        branchName,
+        inputs,
+        specPath: data.draftResult.specRelativePath,
+        pageObjectPath: data.draftResult.pageObjectRelativePath,
+        specCode: data.draftResult.specCode,
+        pageObjectCode: data.draftResult.pageObjectCode,
+        testTable: data.draftResult.testTable,
+        candidateAssertions: data.draftResult.candidateAssertions
+      };
       document.getElementById('branchBadge').textContent = branchName;
       document.getElementById('specPathLabel').textContent = data.draftResult.specRelativePath;
       document.getElementById('poPathLabel').textContent = data.draftResult.pageObjectRelativePath;
@@ -1579,6 +1769,17 @@ Quantity input (min 1, max 10)</textarea>
       const poName = (document.getElementById('poPathLabel').textContent || 'draft.page.ts').split('/').pop();
       downloadTextFile(specName, specCode);
       setTimeout(() => downloadTextFile(poName, poCode), 150);
+    }
+
+    function copyDraftJson() {
+      if (!lastDraftPayload) return;
+      navigator.clipboard.writeText(JSON.stringify(lastDraftPayload, null, 2));
+      showToast('Copied Playwright Draft as JSON!');
+    }
+
+    function downloadDraftJson() {
+      if (!lastDraftPayload) return;
+      downloadTextFile('playwright-draft.json', JSON.stringify(lastDraftPayload, null, 2));
     }
 
     function copyRawText(text) {
